@@ -11,7 +11,7 @@ jobs:
           fetch-depth: 1
       - name: plantuml
         id: plantuml
-        uses: grassedge/generate-plantuml-action@v1.5
+        uses: cloudbees/plantuml-github-action@v1.1.0
         with:
           path: .
           message: "Render PlantUML files"
