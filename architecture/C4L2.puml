@@ -48,5 +48,4 @@ Rel(camunda, invoice_acl, "")
 Rel(invoice_source, invoice_acl, "", "orig-invoice-q8s-v1", $tags="async")
 Rel(invoice_acl, invoice_dest, "", "result-invoice-q8s-v1", $tags="async")
 Rel(invoice_acl, ext_system, "", "https://gateway.int.com:443/ext/v1")
-
 @enduml
