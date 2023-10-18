@@ -1,0 +1,10 @@
+{
+  "extends": "@byndyusoft/tsconfig/tsconfig.node16.json",
+  "compilerOptions": {
+    // Language and Environment
+    "lib": ["es2021", "dom"],
+    "esModuleInterop": true
+  },
+  "exclude": ["./dist", "./node_modules"],
+  "include": ["./**/*.ts"]
+}

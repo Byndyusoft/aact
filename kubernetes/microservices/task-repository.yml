@@ -1,0 +1,5 @@
+name: task-repository
+
+environment:
+  PG_CONNECTION_STRING:
+    default: "postgresql://task-repo:pass-task-repo@postgresql:543/task-repo"

@@ -1,0 +1,5 @@
+name: invoice-repository
+
+environment:
+  PG_CONNECTION_STRING:
+    default: "postgresql://invoice-repo:pass-invoice-repo@postgresql:543/invoice-repo"

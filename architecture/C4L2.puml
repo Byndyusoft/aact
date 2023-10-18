@@ -1,0 +1,52 @@
+@startuml "Demo"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+AddRelTag("async",  $lineStyle = DottedLine())
+AddElementTag("acl",  $bgColor = "#6F9355")
+
+System_Ext(stock, "Stock")
+System_Ext(ext_system, "Ext System")
+System_Ext(invoice_source, "Invoice Source")
+System_Ext(invoice_dest, "Invoice Consumer")
+System_Ext(goods_repository, "Goods Repository")
+System_Ext(goods2_repository, "Goods2 Repository")
+System_Ext(front, "Front")
+
+Boundary(our_system, "Our system"){
+
+        Container(bff, "BFF")
+        Container(goods_acl, "Goods ACL", "", "", $tags="acl")
+        Container(camunda, "Camunda")
+        Container(task_repository, "Task Repository")
+        Container(invoice_repository, "Invoice Repository")
+        Container(invoice_acl, "Invoice ACL", "", "", $tags="acl")
+        Container(stock_acl, "Stock ACL", "", "", $tags="acl")
+
+        ContainerDb(task_repository_db,"DB")
+        ContainerDb(invoice_repository_db,"DB")
+}
+
+Rel(front, bff, "")
+Rel(bff, camunda, "")
+Rel(camunda, stock_acl, "")
+Rel(stock_acl, stock, "", "https://gateway.int.com:443/stock/v1")
+
+Rel(bff, goods_acl, "")
+Rel(goods_acl, goods_repository, "", "https://gateway.int.com:443/goods/v1")
+Rel(goods_acl, goods2_repository, "", "https://gateway.int.com:443/goods2/v1")
+
+Rel(bff, task_repository, "")
+Rel(task_repository, task_repository_db, "")
+
+Rel(bff, invoice_repository, "")
+Rel(invoice_repository, invoice_repository_db, "")
+
+Rel(camunda, task_repository, "")
+Rel(camunda, invoice_repository, "")
+Rel(camunda, invoice_acl, "")
+Rel(invoice_source, invoice_acl, "", "orig-invoice-q8s-v1", $tags="async")
+Rel(invoice_acl, invoice_dest, "", "result-invoice-q8s-v1", $tags="async")
+Rel(invoice_acl, ext_system, "", "https://gateway.int.com:443/ext/v1")
+@enduml

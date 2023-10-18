@@ -1,0 +1,11 @@
+name: bff
+
+environment:
+  INVOICE_REPOSITORY_API_CLIENT_BASE_URL:
+    default: http://invoice-repository:8080
+  TASK_REPOSITORY_API_CLIENT_BASE_URL:
+    default: http://task-repository:8080
+  CAMUNDA_API_CLIENT_BASE_URL:
+    default: http://camunda:8080
+  GOODS_ACL_API_CLIENT_BASE_URL:
+    default: http://goods-acl:8080

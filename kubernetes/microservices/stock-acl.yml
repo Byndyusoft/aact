@@ -1,0 +1,5 @@
+name: stock-acl
+
+environment:
+  STOCK_BASE_URL:
+    default: https://gateway.int.com:443/stock/v1

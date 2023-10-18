@@ -1,0 +1,11 @@
+name: invoice-acl
+
+environment:
+  EXT_SYSTEM_BASE_URL:
+    default: https://gateway.int.com:443/ext/v1
+  KAFKA_INVOICE_BROKERS:
+    default: msg-q8s.int.cloud:9092
+  KAFKA_INVOICE_INPUT_TOPIC:
+    default: orig-invoice-q8s-v1
+  KAFKA_INVOICE_OUTPUT_TOPIC:
+    default: result-invoice-q8s-v1

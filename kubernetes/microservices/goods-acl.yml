@@ -1,0 +1,7 @@
+name: goods-acl
+
+environment:
+  GOODS_REPOSITORY_BASE_URL:
+    default: https://gateway.int.com:443/goods/v1
+  GOODS2_REPOSITORY_BASE_URL:
+    default: https://gateway.int.com:443/goods2/v1

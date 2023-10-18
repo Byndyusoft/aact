@@ -1,0 +1,11 @@
+name: camunda
+
+environment:
+  INVOICE_REPOSITORY_API_CLIENT_BASE_URL:
+    default: http://invoice-repository:8080
+  TASK_REPOSITORY_API_CLIENT_BASE_URL:
+    default: http://task-repository:8080
+  STOCK_ACL_API_CLIENT_BASE_URL:
+    default: http://stock-acl:8080
+  INVOICE_ACL_API_CLIENT_BASE_URL:
+    default: http://invoice-acl:8080
