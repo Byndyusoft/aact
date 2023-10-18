@@ -15,7 +15,6 @@ System_Ext(goods2_repository, "Goods2 Repository")
 System_Ext(front, "Front")
 
 Boundary(our_system, "Our system"){
-
         Container(bff, "BFF")
         Container(goods_acl, "Goods ACL", "", "", $tags="acl")
         Container(camunda, "Camunda")
