@@ -74,5 +74,8 @@
   "packageManager": "yarn@4.0.0-rc.45",
   "engines": {
     "node": ">=16"
+  },
+  "dependencies": {
+    "yarn": "^1.22.19"
   }
 }
