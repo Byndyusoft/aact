@@ -1,0 +1,9 @@
+name: test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    uses: Byndyusoft/node-reusable-workflows/.github/workflows/test.yaml@master
