@@ -14,7 +14,11 @@
   "license": "ISC",
   "author": "Ruslan Safin (Byndyusoft)",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "npm run lint:eslint && npm run lint:markdown && npm run lint:prettier",
+    "lint:eslint": "eslint --ignore-path ./.gitignore --max-warnings 0 --ext .ts,.js .",
+    "lint:markdown": "markdownlint --ignore-path ./.gitignore \"./**/*.md\"",
+    "lint:prettier": "prettier --ignore-path ./.gitignore --check \"./**/*.{ts,js,json,yaml,yml,md}\""
   },
   "jest": {
     "reporters": [

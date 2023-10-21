@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "extends": ["@byndyusoft/eslint-config/backend"],
+  "parserOptions": {
+    "ecmaVersion": 2021 // Node.js v16 LTS
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        // @typescript-eslint/eslint-plugin Supported Rules
+        "@typescript-eslint/no-non-null-assertion": "off" // type hacks
+      }
+    }
+  ]
+}
