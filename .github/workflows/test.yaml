@@ -6,4 +6,19 @@ on:
 
 jobs:
   test:
-    uses: Byndyusoft/node-reusable-workflows/.github/workflows/test.yaml@master
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install -g yarn    
+      - name: yarn install, build and test
+        run: | 
+          yarn 
+          yarn build
+          yarn test
