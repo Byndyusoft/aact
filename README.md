@@ -1,7 +1,7 @@
 # Architecture As Code Tests
 [![test workflow](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml)
 
-Пример микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/) и покрытой тестами
+Пример покрытия тестами микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/)
 
 ## Архитектура
 [![C4](./architecture/Demo.svg)](./architecture/Demo.svg)
