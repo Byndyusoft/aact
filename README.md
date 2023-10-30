@@ -4,12 +4,29 @@
 Код и примеры покрытия тестами микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/)
 
 ## Что это, какую боль решает, и с чего начать?
-[Слайды доклада](https://docs.google.com/presentation/d/16_3h1BTIRyREXO_oSqnjEbRJAnN3Z4aX/edit?usp=sharing&ouid=106100367728328513490&rtpof=true&sd=true) на тему тестирования архитектуры, в слайдах подробнее и визуальнее описана схема работы тестов и объяснены примеры проверяемых принципов. 
+Раз архитектура — «as Code», почему бы её не покрыть тестами?!
 
-## Архитектура
+Тема идеи и данный открытый репозиторий вызвал неожиданную волну позитивных отзывов о попадании в яблочко болей и о применимости и полезности решения :) 
+
+Подход помогает решить **проблемы неактуальности, декларативности и отсутствия контроля ИТ-архитектур и инфраструктуры** (ограничение и требование — архитектура и инфраструктура должны быть "as code").
+
+Тесты проверяют 2 больших блока:
+- актуальность архитектуры реальному работающему в продакшне решению
+- соответствие "нарисованной" архитектуры выбранным принципам и паттернам проектирования
+
+Подробнее о подходе, решаемых проблемах, схеме работы представленного в репозитории примера и проверяемых в тестах репозитория принципах — на [слайдах доклада](https://docs.google.com/presentation/d/16_3h1BTIRyREXO_oSqnjEbRJAnN3Z4aX/edit?usp=sharing&ouid=106100367728328513490&rtpof=true&sd=true).
+
+### Схема работы
+<img src="https://github.com/Byndyusoft/aact/assets/1096954/9b0ad909-b789-4395-a580-9fb44397afa0" height="350">
+
+### Визуализация примера автоматически проверяемого принципа (отсутствие бизнес-логики в CRUD-сервисах)
+<img src="https://github.com/Byndyusoft/aact/assets/1096954/292b1bbd-0f18-40be-9560-65385a1d4df9" height="300">
+
+
+## Пример архитектуры, которую покроем тестами
 [![C4](./architecture/Demo.svg)](./architecture/Demo.svg)
 
-## Тесты
+## Пример тестов
 1. [Finds diff in configs and uml containers](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L43C10-L43C48) — проверяет актуальность списка микросервисов на архитектуре и в [конфигурации инфраструктуры](https://github.com/razonrus/aact/tree/main/kubernetes/microservices)
 2. [Finds diff in configs and uml dependencies](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L52C9-L52C9) — проверяет актуальность зависимостей (связей) микросервисов на архитектуре и в [конфигурации инфраструктуры](https://github.com/razonrus/aact/tree/main/kubernetes/microservices)
 3. [Check that urls and topics from relations exists in config](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L86C5-L86C5) — проверяет соответствие между параметрами связей микросервисов (REST-урлы, топики kafka) на архитектуре и в [конфигурации инфраструктуры](https://github.com/razonrus/aact/tree/main/kubernetes/microservices)
