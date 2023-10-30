@@ -2,6 +2,7 @@
 [![test workflow](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml)
 
 Пример покрытия тестами микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/)
+[Слайды доклада](https://docs.google.com/presentation/d/16_3h1BTIRyREXO_oSqnjEbRJAnN3Z4aX/edit?usp=sharing&ouid=106100367728328513490&rtpof=true&sd=true) на тему тестирования архитектуры, в слайдах подробнее и визуальнее описана схема работы тестов и объяснены примеры проверяемых принципов. 
 
 ## Архитектура
 [![C4](./architecture/Demo.svg)](./architecture/Demo.svg)
