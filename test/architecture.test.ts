@@ -40,7 +40,7 @@ describe("Architecture", () => {
     global.console = console;
   });
 
-  it("finds diff in configs and uml containers", () => {
+  it("find diff in configs and uml containers", () => {
     const namesFromDeploy = deployConfigs.map((x) => x.name);
     const containerNamesFromPuml = containersFromPuml
       .filter((x) => x.type === ContainerType)
@@ -49,7 +49,7 @@ describe("Architecture", () => {
     expect(namesFromDeploy).toStrictEqual(containerNamesFromPuml);
   });
 
-  it("finds diff in configs and uml dependencies", () => {
+  it("find diff in configs and uml dependencies", () => {
     let firstFailedConfig: DeployConfig = {
       name: "",
       sections: [],
@@ -83,7 +83,7 @@ describe("Architecture", () => {
     }
   });
 
-  it("check that urls and topics from relations exists in config", () => {
+  it("check that urls and topics from relations exist in config", () => {
     let pass = true;
     for (const container of containersFromPuml) {
       const config = deployConfigsForContainers.find(
@@ -108,7 +108,7 @@ describe("Architecture", () => {
     expect(pass).toBeTruthy();
   });
 
-  it("only acl can depence from external systems", () => {
+  it("only acl can depend on external systems", () => {
     let pass = 0;
     for (const container of containersFromPuml) {
       let log = `Container name ${container.name} `;
