@@ -16,8 +16,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-        env:
-          SKIP_YARN_COREPACK_CHECK: "true" # TODO: delete this when https://github.com/actions/setup-node/issues/899 is resolved
       - run: npm install -g yarn    
       - name: yarn install, build and test
         run: | 
