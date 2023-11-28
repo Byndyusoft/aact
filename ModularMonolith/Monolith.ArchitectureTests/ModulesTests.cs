@@ -189,7 +189,7 @@ namespace Monolith.ArchitectureTests
                                   {
                                       Name = "BFF",
                                       ReferencedModules = { "Shedule", "ProjectQuality", "Customers" },
-                                      Contract = "Monolith.BFF",
+                                      Contract = "Monolith.Api",
                                       Implementation = [],
                                       InternalReferences = []
                                   }

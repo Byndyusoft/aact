@@ -7,4 +7,23 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Audit\Audit.Contracts\Audit.Contracts.csproj" />
+    <ProjectReference Include="..\Audit\Audit.Domain\Audit.Domain.csproj" />
+    <ProjectReference Include="..\Common\Common.Contracts\Common.Contracts.csproj" />
+    <ProjectReference Include="..\Common\Common.Domain\Common.Domain.csproj" />
+    <ProjectReference Include="..\Customers\Byndyusoft.Customers.Contracts\Byndyusoft.Customers.Contracts.csproj" />
+    <ProjectReference Include="..\Customers\Byndyusoft.Customers.DataAccess\Byndyusoft.Customers.DataAccess.csproj" />
+    <ProjectReference Include="..\Customers\Byndyusoft.Customers.Domain\Byndyusoft.Customers.Domain.csproj" />
+    <ProjectReference Include="..\Customers\Byndyusoft.Customers.Processing\Byndyusoft.Customers.Processing.csproj" />
+    <ProjectReference Include="..\Emails\Emails.Contracts\Emails.Contracts.csproj" />
+    <ProjectReference Include="..\Emails\Emails.Domain\Emails.Domain.csproj" />
+    <ProjectReference Include="..\ProjectQuality\Byndyusoft.ProjectQuality.Contracts\Byndyusoft.ProjectQuality.Contracts.csproj" />
+    <ProjectReference Include="..\ProjectQuality\Byndyusoft.ProjectQuality.DataAccess\Byndyusoft.ProjectQuality.DataAccess.csproj" />
+    <ProjectReference Include="..\ProjectQuality\Byndyusoft.ProjectQuality.Domain\Byndyusoft.ProjectQuality.Domain.csproj" />
+    <ProjectReference Include="..\Schedule\Shedule.Contract\Shedule.Contract.csproj" />
+    <ProjectReference Include="..\Schedule\Shedule.DataAccess\Shedule.DataAccess.csproj" />
+    <ProjectReference Include="..\Schedule\Shedule.Domain\Shedule.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
