@@ -211,3 +211,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 package-lock.json
+
+**/.vs/*
+**/bin/*
+**/obj/*
