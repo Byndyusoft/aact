@@ -6,6 +6,11 @@
 PullRequest'ы и Issues'ы приветствуются.<br/>
 Обсудить можно, например, в [чате](https://t.me/rsa_chat) [канала](https://t.me/rsa_enc)
 
+## Запись доклада 
+[![video](http://img.youtube.com/vi/tZ-FQeObSjY/0.jpg)]([http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE](https://www.youtube.com/watch?v=tZ-FQeObSjY) "Раз архитектура — «as Code», почему бы её не покрыть тестами?! / Руслан Сафин (Бындюсофт)")
+
+https://www.youtube.com/watch?v=tZ-FQeObSjY
+
 ## Что это, какую боль решает, и с чего начать?
 Раз архитектура — «as Code», почему бы её не покрыть тестами?!
 
