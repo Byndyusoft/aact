@@ -40,3 +40,13 @@ https://www.youtube.com/watch?v=tZ-FQeObSjY
 3. [Check that urls and topics from relations exists in config](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L86C5-L86C5) — проверяет соответствие между параметрами связей микросервисов (REST-урлы, топики kafka) на архитектуре и в [конфигурации инфраструктуры](https://github.com/razonrus/aact/tree/main/kubernetes/microservices)
 4. [Only acl can depence from external systems](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L111C7-L111C49) — проверяет, что не нарушен выбранный принцип построения интеграций с внешними системами только через ACL (Anti Corruption Layer). Проверяет, что только acl-микросервисы имеют зависимости от внешних систем.
 5. [Connect to external systems only by API Gateway or kafka](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L127C16-L127C16) — проверяет, что все внешние интеграции идут через API Gateway или через kafka
+
+
+## Генерация архитектуры из описанной «as Code» инфраструктуры
+Добавил [код](https://github.com/Byndyusoft/aact/blob/39d8141a241f1139d5e58061f8674a22341b72de/test/architecture.test.ts#L214), который полностью с нуля генерирует архитектуру в plantuml по данным из IaC.
+
+Сравнение ~~белковой~~ составленной вручную архитектуры и сгенерированной.
+### Ручная:
+[![C4](./architecture/Demo%20Tests.svg)](./architecture/Demo%20Tests.svg)
+### Сгенерированная:
+[![C4](./architecture/Demo%20Generated.svg)](./architecture/Demo%20Generated.svg)
