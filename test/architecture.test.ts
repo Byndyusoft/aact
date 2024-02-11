@@ -1,4 +1,9 @@
 /* eslint-disable no-console */
+import fs from "fs/promises";
+import path from "path";
+
+import { Stdlib_C4_Dynamic_Rel } from "plantuml-parser";
+
 import { Container } from "./containers";
 import {
   DeployConfig,
@@ -27,7 +32,7 @@ describe("Architecture", () => {
     containersFromPuml = mapContainersFromPlantumlElements(pumlElements);
 
     deployConfigsForContainers = deployConfigs.filter((x) =>
-      containersFromPuml.find((y) => x.name === y.name)
+      containersFromPuml.find((y) => x.name === y.name),
     );
   });
 
@@ -75,7 +80,7 @@ describe("Architecture", () => {
     console.log(`First failed container name ${firstFailedConfig.name}`);
     console.log(`--------------------------------------------------------`);
     expect(
-      checkSections(firstFailedConfig, pumlContainer, containersFromPuml, true)
+      checkSections(firstFailedConfig, pumlContainer, containersFromPuml, true),
     ).toBeTruthy();
 
     function getPumlContainer(name: string): Container | undefined {
@@ -87,7 +92,7 @@ describe("Architecture", () => {
     let pass = true;
     for (const container of containersFromPuml) {
       const config = deployConfigsForContainers.find(
-        (x) => x.name === container.name
+        (x) => x.name === container.name,
       );
       if (!config) continue;
       let log = `Container name ${container.name} `;
@@ -96,7 +101,7 @@ describe("Architecture", () => {
         if (
           items &&
           !items.every((i: string) =>
-            config.sections.some((s) => s.prod_value === i)
+            config.sections.some((s) => s.prod_value === i),
           )
         ) {
           log = `${log}❌ ${relation.to.name} ${items}`;
@@ -113,7 +118,7 @@ describe("Architecture", () => {
     for (const container of containersFromPuml) {
       let log = `Container name ${container.name} `;
       const externalRelations = container.relations.filter(
-        (r) => r.to.type === SystemExternalType
+        (r) => r.to.type === SystemExternalType,
       );
       if (!container.tags?.includes("acl") && externalRelations.length > 0) {
         log = `${log}❌ ${externalRelations.map((x) => x.to.name).toString()}`;
@@ -129,14 +134,14 @@ describe("Architecture", () => {
     for (const container of containersFromPuml) {
       let log = `Container name ${container.name} `;
       for (const r of container.relations.filter(
-        (relation) => relation.to.type === SystemExternalType
+        (relation) => relation.to.type === SystemExternalType,
       )) {
         if (
           !r.technology
             ?.split(", ")
             .every(
               (i: string) =>
-                i.startsWith("https://gateway.int.com:443/") || /-v\d$/.exec(i)
+                i.startsWith("https://gateway.int.com:443/") || /-v\d$/.exec(i),
             )
         ) {
           log = `${log}❌ ${r.to.name}`;
@@ -152,7 +157,7 @@ describe("Architecture", () => {
     config: DeployConfig,
     containerFromPuml: Container,
     allContainersFromPuml: Container[],
-    verbose = false
+    verbose = false,
   ): boolean {
     return (
       config.sections.every((section) => {
@@ -173,12 +178,12 @@ describe("Architecture", () => {
               (r) =>
                 r.to.name === config.name &&
                 section.prod_value &&
-                r.technology?.includes(section.prod_value)
-            )
+                r.technology?.includes(section.prod_value),
+            ),
           );
         if (!result && verbose)
           console.log(
-            `In Config But Not In PUML: ${section.name} ${section.prod_value}`
+            `In Config But Not In PUML: ${section.name} ${section.prod_value}`,
           );
         return result;
       }) &&
@@ -186,23 +191,119 @@ describe("Architecture", () => {
         ...containerFromPuml.relations,
         ...allContainersFromPuml.flatMap((x) =>
           x.relations.filter(
-            (r) => r.to.name === config.name && r.tags?.includes(AsyncTag)
-          )
+            (r) => r.to.name === config.name && r.tags?.includes(AsyncTag),
+          ),
         ),
       ].every((relation) => {
         const result = config.sections.some(
           (configSection) =>
             configSection.name === relation.to.name ||
             (configSection.prod_value &&
-              relation.technology?.includes(configSection.prod_value))
+              relation.technology?.includes(configSection.prod_value)),
         );
 
         if (!result && verbose)
           console.log(
-            `In PUML But Not In Config: ${relation.technology} ${relation.to.name}`
+            `In PUML But Not In Config: ${relation.technology} ${relation.to.name}`,
           );
         return result;
       })
     );
   }
+
+  it("generate puml from configs", async () => {
+    const filepath = path.join(process.cwd(), "architecture", "generated.puml");
+    let data = `@startuml "Demo"
+    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+    LAYOUT_WITH_LEGEND()
+    AddRelTag("async",  $lineStyle = DottedLine())
+    AddElementTag("acl",  $bgColor = "#6F9355")
+    Boundary(project, "Our system"){
+  `;
+
+    const rels: Stdlib_C4_Dynamic_Rel[] = [];
+    const extSystems: string[] = [];
+    const intContainers: string[] = [];
+
+    for (const config of deployConfigsForContainers) {
+      data += `Container(${config.name}, "${config.name.replaceAll("_", " ")}"`;
+      if (config.name.endsWith("acl")) data += `, "", "", $tags="acl"`;
+      data += `)
+`;
+      intContainers.push(config.name);
+
+      if (config.environment?.PG_CONNECTION_STRING) {
+        const dbName = config.name + "_db";
+        data += `ContainerDb(${dbName}, "DB")
+`;
+        intContainers.push(dbName);
+        addRel(config.name, dbName, "", false);
+      }
+    }
+    data += `}
+`;
+
+    for (const config of deployConfigsForContainers) {
+      for (const section of config.sections) {
+        if (section.name.startsWith("kafka")) {
+          const containers = deployConfigsForContainers.filter(
+            (x) =>
+              x.name !== config.name &&
+              x.sections.some((s) => s.prod_value === section.prod_value),
+          );
+          for (const rel of containers) {
+            addRel(config.name, rel.name, "", true);
+          }
+          if (containers.length == 0) {
+            addRel(
+              config.name,
+              section.name.replaceAll("kafka_", "").replaceAll("_topic", ""),
+              section.prod_value,
+              true,
+            );
+          }
+        } else {
+          addRel(config.name, section.name, section.prod_value, false);
+        }
+      }
+    }
+    data += "@enduml";
+    await fs.writeFile(filepath, data);
+
+    function addRel(
+      fromName: string,
+      toName: string,
+      transport: string,
+      async: boolean,
+    ): void {
+      if (
+        !rels.some(
+          (x) =>
+            (x.from === fromName && x.to === toName) ||
+            (x.to === fromName && x.from === toName),
+        )
+      ) {
+        var transportAttribute = "";
+        if (
+          !intContainers.includes(toName) &&
+          !extSystems.includes(toName)
+        ) {
+          data += `System_Ext(${toName}, "${toName}", " ")
+`;
+          extSystems.push(toName);
+          transportAttribute = `, "${transport}"`;
+        }
+
+        data += `Rel(${fromName}, ${toName}, ""${transportAttribute}`;
+        if (async) data += `, $tags="async"`;
+        data += `)
+            `;
+
+        rels.push({
+          from: fromName,
+          to: toName,
+        } as Stdlib_C4_Dynamic_Rel);
+      }
+    }
+  });
 });
