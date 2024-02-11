@@ -213,7 +213,7 @@ describe("Architecture", () => {
 
   it("generate puml from configs", async () => {
     const filepath = path.join(process.cwd(), "architecture", "generated.puml");
-    let data = `@startuml "Demo"
+    let data = `@startuml "Demo Generated"
     !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
     LAYOUT_WITH_LEGEND()
     AddRelTag("async",  $lineStyle = DottedLine())

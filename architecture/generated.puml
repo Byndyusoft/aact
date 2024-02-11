@@ -1,4 +1,4 @@
-@startuml "Demo"
+@startuml "Demo Generated"
     !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
     LAYOUT_WITH_LEGEND()
     AddRelTag("async",  $lineStyle = DottedLine())
