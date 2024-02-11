@@ -32,7 +32,7 @@ https://www.youtube.com/watch?v=tZ-FQeObSjY
 
 
 ## Пример архитектуры, которую покроем тестами
-[![C4](./architecture/Demo.svg)](./architecture/Demo.svg)
+[![C4](./architecture/Demo Tests.svg)](./architecture/Demo%20Tests.svg)
 
 ## Пример тестов
 1. [Finds diff in configs and uml containers](https://github.com/razonrus/aact/blob/721edde3767dc0e51d19c80c3b6adba9fbf7b007/test/architecture.test.ts#L43C10-L43C48) — проверяет актуальность списка микросервисов на архитектуре и в [конфигурации инфраструктуры](https://github.com/razonrus/aact/tree/main/kubernetes/microservices)
