@@ -50,3 +50,9 @@ https://www.youtube.com/watch?v=tZ-FQeObSjY
 [![C4](./architecture/Demo%20Tests.svg)](./architecture/Demo%20Tests.svg)
 ### Сгенерированная:
 [![C4](./architecture/Demo%20Generated.svg)](./architecture/Demo%20Generated.svg)
+
+# Тестирование модульного монолита
+
+Тестами можно покрывать не только архитектуру микросервисов, но архитектуру монолитов, особенно, если они модульные.
+
+*  [Тест архитектуры модульного монолита на C#](https://github.com/Byndyusoft/aact/tree/main/ModularMonolith)
