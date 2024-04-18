@@ -1,15 +1,20 @@
-# Architecture As Code Tests
+# Architecture As Code Tools
 [![test workflow](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/razonrus/ArchAsCode_Tests/actions/workflows/test.yaml)
 
-Код и примеры покрытия тестами микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/)
+Инструменты для работы с архитектурой в формате "as Code": 
+1. Код и примеры покрытия тестами микросервисной архитектуры, описанной в [plantuml](https://plantuml.com/ru/)
+2. Автогенерация архитектуры
+3. Тестирование архитектуры модульного монолита
 
 PullRequest'ы и Issues'ы приветствуются.<br/>
-Обсудить можно, например, в [чате](https://t.me/rsa_chat) [канала](https://t.me/rsa_enc)
+Телеграм-канал: [Архитектура распределённых систем](https://t.me/rsa_enc)
 
-## Запись доклада 
-[![video](http://img.youtube.com/vi/tZ-FQeObSjY/0.jpg)](https://www.youtube.com/watch?v=tZ-FQeObSjY "Раз архитектура — «as Code», почему бы её не покрыть тестами?! / Руслан Сафин (Бындюсофт)")
+## Публичные материалы 
+#### Раз архитектура — «as Code», почему бы её не покрыть тестами?!
+<a href="[url](https://www.youtube.com/watch?v=POIbWZh68Cg)"><img src="https://github.com/Byndyusoft/aact/assets/1096954/e011958e-12c8-4fb9-97f4-a61779408e4f" width="400"/></a>
+<a href="[url](https://www.youtube.com/watch?v=tZ-FQeObSjY)"><img src="https://github.com/Byndyusoft/aact/assets/1096954/daea29de-776b-49a0-b781-ad4eba9a2221" width="400"/></a>
+https://www.youtube.com/watch?v=POIbWZh68Cg $~~~~~~~~~~$ https://www.youtube.com/watch?v=tZ-FQeObSjY
 
-https://www.youtube.com/watch?v=tZ-FQeObSjY
 
 ## Что это, какую боль решает, и с чего начать?
 Раз архитектура — «as Code», почему бы её не покрыть тестами?!
