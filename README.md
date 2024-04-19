@@ -8,6 +8,8 @@
 
 [Планы развития инструментов и репозитория](https://github.com/Byndyusoft/aact/blob/main/roadmap.md). PullRequest'ы и Issues'ы приветствуются.
 
+[Справочник принципов и паттернов проектирования с примерами покрытия их тестами](https://github.com/Byndyusoft/aact/blob/main/patterns.md)
+
 <img src="https://github.com/Byndyusoft/aact/assets/1096954/a3c3b3b0-a09b-4da7-aca4-5538159b371c" width="15"/> Телеграм-канал: [Архитектура распределённых систем](https://t.me/rsa_enc)
 
 ## Публичные материалы 
