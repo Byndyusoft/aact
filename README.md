@@ -6,7 +6,7 @@
 2. Автогенерация архитектуры ([#](#%D0%B0%D0%B2%D1%82%D0%BE%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D1%8B-1))
 3. Тестирование архитектуры модульного монолита ([#](#%D1%82%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BC%D0%BE%D0%B4%D1%83%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BC%D0%BE%D0%BD%D0%BE%D0%BB%D0%B8%D1%82%D0%B0))
 
-PullRequest'ы и Issues'ы приветствуются.<br/>
+[Планы развития инструментов и репозитория](https://github.com/Byndyusoft/aact/blob/main/roadmap.md). PullRequest'ы и Issues'ы приветствуются.<br/>
 <img src="https://github.com/Byndyusoft/aact/assets/1096954/a3c3b3b0-a09b-4da7-aca4-5538159b371c" width="15"/> Телеграм-канал: [Архитектура распределённых систем](https://t.me/rsa_enc)
 
 ## Публичные материалы 
