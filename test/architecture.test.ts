@@ -225,7 +225,7 @@ Boundary(project, "Our system"){
     const extSystems: string[] = [];
     const intContainers: string[] = [];
 
-    for (const config of deployConfigsForContainers) {
+    for (const config of deployConfigs) {
       data += `Container(${config.name}, "${config.name.replaceAll("_", " ")}"`;
       if (config.name.endsWith("acl")) data += `, "", "", $tags="acl"`;
       data += `)
@@ -243,10 +243,10 @@ Boundary(project, "Our system"){
     data += `}
 `;
 
-    for (const config of deployConfigsForContainers) {
+    for (const config of deployConfigs) {
       for (const section of config.sections) {
         if (section.name.startsWith("kafka")) {
-          const containers = deployConfigsForContainers.filter(
+          const containers = deployConfigs.filter(
             (x) =>
               x.name !== config.name &&
               x.sections.some((s) => s.prod_value === section.prod_value),
