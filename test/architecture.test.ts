@@ -214,12 +214,12 @@ describe("Architecture", () => {
   it("generate puml from configs", async () => {
     const filepath = path.join(process.cwd(), "architecture", "generated.puml");
     let data = `@startuml "Demo Generated"
-    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-    LAYOUT_WITH_LEGEND()
-    AddRelTag("async",  $lineStyle = DottedLine())
-    AddElementTag("acl",  $bgColor = "#6F9355")
-    Boundary(project, "Our system"){
-  `;
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+AddRelTag("async",  $lineStyle = DottedLine())
+AddElementTag("acl",  $bgColor = "#6F9355")
+Boundary(project, "Our system"){
+`;
 
     const rels: Stdlib_C4_Dynamic_Rel[] = [];
     const extSystems: string[] = [];
@@ -297,7 +297,7 @@ describe("Architecture", () => {
         data += `Rel(${fromName}, ${toName}, ""${transportAttribute}`;
         if (async) data += `, $tags="async"`;
         data += `)
-            `;
+`;
 
         rels.push({
           from: fromName,
