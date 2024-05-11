@@ -3,7 +3,16 @@ import { Section } from "../containers";
 import { DeployConfig } from ".";
 
 const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
-  const envWhitelist = ["BASE_URL", "PROTOCOL", /[A-Z_]+(?<!ERROR)_TOPIC/];
+  const envWhitelist = [
+    "BASE_URL",
+    "PROTOCOL",
+    /[A-Z_]+(?<!ERROR)_TOPIC/,
+    "__BaseAddress",
+    "__BaseAddress",
+    "__Endpoint",
+    "__SmtpServer",
+    "QueueName",
+  ];
   const envNamePartsToCleanup = [
     "_BASE_URL",
     "_API",
@@ -12,12 +21,12 @@ const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
     /_KAFKA_[A-Z_]+_TOPIC/,
   ];
 
-  const synonymes = new Map<string, string[]>([  ]);
+  const synonymes = new Map<string, string[]>([]);
 
   const environment = deployConfig?.environment ?? {};
   const envKeys = Object.keys(environment);
   const filteredEnvKeys = envKeys.filter((envName) =>
-    envWhitelist.some((white) => envName.match(white))
+    envWhitelist.some((white) => envName.match(white)),
   );
 
   const sections: Section[] = filteredEnvKeys
@@ -28,7 +37,7 @@ const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
         name: envNamePartsToCleanup
           .reduce(
             (acc, partToCleanup) => acc.toString().replace(partToCleanup, ""),
-            envName
+            envName,
           )
           .toString(),
       };
@@ -40,14 +49,14 @@ const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
       }
       return relation;
     });
-  deployConfig.name = deployConfig.name.replaceAll("-", "_");
+  deployConfig.name = (deployConfig.name ?? deployConfig.fileName).replace(/[\s-\(\)]/g, "_");
   deployConfig.sections = sections;
 
   return deployConfig;
 };
 
 export const mapFromConfigs = (
-  deployConfigs: DeployConfig[]
+  deployConfigs: DeployConfig[],
 ): DeployConfig[] => {
   return deployConfigs
     .map(mapFromConfig)

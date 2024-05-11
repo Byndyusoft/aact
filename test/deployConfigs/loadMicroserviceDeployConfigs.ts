@@ -7,12 +7,12 @@ import { DeployConfig } from "./deployConfig";
 
 const getMicroserviceFilepaths = async ():Promise<string[]> => {
   const partialNamesToExclude = ["migrator", "platform", "citest", "tests"];
-  const namesToExclude = new Set(["reception-orchestrator.yml"]);
+  const namesToExclude = new Set(["ignore.yml"]);
 
   const deploysPath = path.join(process.cwd(), "kubernetes", "microservices");
 
   const filenames = (await fs.readdir(deploysPath, "utf8"))
-    .filter((filename) => path.extname(filename) === ".yml")
+    .filter((filename) => new Set([".yml", ".yaml"]).has(path.extname(filename)))
     .filter((filename) => !namesToExclude.has(filename))
     .filter((filename) =>
       partialNamesToExclude.every((toExclude) => !filename.includes(toExclude))
@@ -26,6 +26,13 @@ export const loadMicroserviceDeployConfigs = async (): Promise<
 > => {
   const filepaths = await getMicroserviceFilepaths();
   return Promise.all(
-    filepaths.map(async (filePath):Promise<DeployConfig> => YAML.parse(await fs.readFile(filePath, "utf8")))
+    filepaths.map(async (filePath):Promise<DeployConfig> => {
+      const content = await fs.readFile(filePath, "utf8");
+      let parsed = YAML.parse(content.replaceAll("env:","environment:"));
+      if(parsed.microservice)
+        parsed = parsed.microservice;
+      parsed.fileName = path.parse(filePath).name;
+      return parsed;
+    })
   );
 };
