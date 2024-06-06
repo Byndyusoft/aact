@@ -215,3 +215,4 @@ package-lock.json
 **/.vs/*
 **/bin/*
 **/obj/*
+**/nppBackup/*
