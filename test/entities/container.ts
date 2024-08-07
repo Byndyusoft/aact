@@ -1,4 +1,4 @@
-import { Relation } from "./Relation";
+import { Relation } from "./relation";
 
 export interface Container {
   readonly name: string;

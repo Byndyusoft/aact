@@ -1,0 +1,31 @@
+@startuml "Demo Tests"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+System_Ext(ext, "Внешняя система")
+
+Boundary(boundary0, "Наш проект", $tags="project"){
+
+        Boundary(boundary1, "Контекст 1", $tags="context"){
+                Container(service1, "Микросервис A")
+                Container(service2, "Микросервис B")
+                Container(service3, "Микросервис C")
+        }
+
+        Boundary(boundary2, "Контекст 2", $tags="context"){
+                Container(service4, "Микросервис X")
+                Container(service5, "Микросервис Y")
+        }
+}
+
+Rel(service1, service2, "")
+Rel(service1, service3, "")
+Rel(service2, service3, "")
+
+Rel(service1, service4, "")
+Rel(service2, service5, "")
+
+Rel(service4, service5, "")
+
+Rel(service3, ext, "")
+
+@enduml

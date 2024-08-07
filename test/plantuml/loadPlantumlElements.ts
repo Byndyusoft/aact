@@ -24,6 +24,7 @@ const filterElements = (elements: UMLElement[]): UMLElement[] => {
 
     const elementAsBoundary = element as Stdlib_C4_Boundary;
     if (elementAsBoundary.type_.name === "Boundary") {
+      result.push(elementAsBoundary);
       const resultFromBoundary = filterElements(elementAsBoundary.elements);
       result.push(...resultFromBoundary);
     }
@@ -44,12 +45,12 @@ const filterElements = (elements: UMLElement[]): UMLElement[] => {
   return result;
 };
 
-const getFilepath = (): string => {
-  return path.join(process.cwd(), "architecture", "C4L2.puml");
+const getFilepath = (fileName: string): string => {
+  return path.join(process.cwd(), "architecture", fileName);
 };
 
-export const loadPlantumlElements = async (): Promise<UMLElement[]> => {
-  const filepath = getFilepath();
+export const loadPlantumlElements = async (fileName: string): Promise<UMLElement[]> => {
+  const filepath = getFilepath(fileName);
 
   let data = await fs.readFile(filepath, "utf8");
   data = data

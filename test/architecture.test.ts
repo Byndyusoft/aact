@@ -4,7 +4,7 @@ import path from "path";
 
 import { Stdlib_C4_Dynamic_Rel } from "plantuml-parser";
 
-import { Container } from "./containers";
+import { Container } from "./entities";
 import {
   DeployConfig,
   loadMicroserviceDeployConfigs,
@@ -28,8 +28,8 @@ describe("Architecture", () => {
   beforeAll(async () => {
     deployConfigs = mapFromConfigs(await loadMicroserviceDeployConfigs());
 
-    const pumlElements = await loadPlantumlElements();
-    containersFromPuml = mapContainersFromPlantumlElements(pumlElements);
+    const pumlElements = await loadPlantumlElements("C4L2.puml");
+    containersFromPuml = mapContainersFromPlantumlElements(pumlElements).allContainers;
 
     deployConfigsForContainers = deployConfigs.filter((x) =>
       containersFromPuml.find((y) => x.name === y.name),

@@ -1,4 +1,4 @@
-import { Section } from "../containers";
+import { Section } from "../entities";
 
 export interface DeployConfig {
   name: string;
