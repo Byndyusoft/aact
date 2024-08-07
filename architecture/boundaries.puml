@@ -3,15 +3,15 @@
 
 System_Ext(ext, "Внешняя система")
 
-Boundary(boundary0, "Наш проект", $tags="project"){
+Boundary(boundary0, "Наш проект"){
 
-        Boundary(boundary1, "Контекст 1", $tags="context"){
+        Boundary(boundary1, "Контекст 1"){
                 Container(service1, "Микросервис A")
                 Container(service2, "Микросервис B")
                 Container(service3, "Микросервис C")
         }
 
-        Boundary(boundary2, "Контекст 2", $tags="context"){
+        Boundary(boundary2, "Контекст 2"){
                 Container(service4, "Микросервис X")
                 Container(service5, "Микросервис Y")
         }

@@ -6,7 +6,7 @@ export interface Boundary {
   readonly label: string;
   readonly type?: string;
   readonly tags?: string;
-  readonly boundaries: Boundary[];
+  boundaries: Boundary[];
   readonly containers: Container[];
 }
 
