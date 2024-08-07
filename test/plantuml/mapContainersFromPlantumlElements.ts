@@ -63,7 +63,6 @@ export const mapContainersFromPlantumlElements = (
         name: component.alias,
         label: component.label,
         type: component.type_.name,
-        tags: component.tags,
         boundaries: [],
         containers: containers.filter((container) =>
           component.elements
