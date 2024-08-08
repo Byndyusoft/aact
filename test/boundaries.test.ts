@@ -40,7 +40,8 @@ describe("Architecture", () => {
       if (boundary.boundaries.length > 0)
         expect(cohesion).toBeLessThan(
           boundary.boundaries.reduce(
-            (sum, current) => sum + GetBoundaryCohesion(current),
+            (sum: number, current: Boundary) =>
+              sum + GetBoundaryCohesion(current),
             0,
           ),
         );
