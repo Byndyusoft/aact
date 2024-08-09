@@ -28,6 +28,7 @@ describe("Architecture", () => {
   });
 
   it("check coupling and cohesion", () => {
+    // для всех наших контекстов и периметров
     for (const boundary of pumlFile.boundaries) {
       const cohesion = GetBoundaryCohesion(boundary);
       const coupling = GetBoundaryCoupling(boundary);
@@ -35,8 +36,10 @@ describe("Architecture", () => {
       console.log(
         boundary.label + " — Cohesion: " + cohesion + "; Coupling: " + coupling,
       );
-
+      // во-первых, внутренняя прочность периметра должна быть больше внешней связанности 
       expect(cohesion).toBeGreaterThan(coupling);
+
+      // во-вторых, если у периметр содержит в себе другие периметры — его прочность должна быть меньше суммы прочностей внутренних периметров 
       if (boundary.boundaries.length > 0)
         expect(cohesion).toBeLessThan(
           boundary.boundaries.reduce(
