@@ -26,7 +26,7 @@ Boundary(our_system, "Our system"){
         ContainerDb(task_repository_db,"DB")
         ContainerDb(invoice_repository_db,"DB")
 
-        Container(invoice_relay, "Invoice Relay", "", "", $tags="relay")
+        'Container(invoice_relay, "Invoice Relay", "", "", $tags="relay")
 }
 
 Rel(front, bff, "")
@@ -38,11 +38,13 @@ Rel(bff, goods_acl, "")
 Rel(goods_acl, goods_repository, "", "https://gateway.int.com:443/goods/v1")
 Rel(goods_acl, goods2_repository, "", "https://gateway.int.com:443/goods2/v1")
 
+Rel(bff, task_repository, "")
 Rel(task_repository, task_repository_db, "")
+'Rel(task_repository, bff, "")
 
 Rel(bff, invoice_repository, "")
 Rel(invoice_repository, invoice_repository_db, "")
-Rel(invoice_relay, invoice_repository_db, "")
+'Rel(invoice_relay, invoice_repository_db, "")
 
 Rel(camunda, task_repository, "")
 Rel(camunda, invoice_repository, "")
