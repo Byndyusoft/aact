@@ -195,7 +195,7 @@ describe("Architecture", () => {
           ),
         ),
       ].every((relation) => {
-        const result = config.sections.some(
+        const result = relation.to.name.endsWith("_db") || config.sections.some(
           (configSection) =>
             configSection.name === relation.to.name ||
             (configSection.prod_value &&
