@@ -18,8 +18,8 @@ Boundary(our_system, "Our system"){
         Container(bff, "BFF")
         Container(goods_acl, "Goods ACL", "", "", $tags="acl")
         Container(camunda, "Camunda")
-        Container(task_repository, "Task Repository")
-        Container(invoice_repository, "Invoice Repository")
+        Container(task_repository, "Task Repository", "", "", $tags="repo")
+        Container(invoice_repository, "Invoice Repository", "", "", $tags="repo")
         Container(invoice_acl, "Invoice ACL", "", "", $tags="acl")
         Container(stock_acl, "Stock ACL", "", "", $tags="acl")
 
