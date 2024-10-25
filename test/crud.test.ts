@@ -20,7 +20,12 @@ describe("Architecture", () => {
       const dbRelation = container.relations.filter(
         (r) => r.to.type === ContainerDb,
       );
-      if (!container.tags?.includes("repo") && dbRelation.length > 0) fail();
+      if (
+        !container.tags?.includes("repo") &&
+        !container.tags?.includes("relay") &&
+        dbRelation.length > 0
+      )
+        fail();
 
       if (
         container.tags?.includes("repo") &&
