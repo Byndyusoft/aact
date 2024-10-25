@@ -11,7 +11,8 @@ describe("Architecture", () => {
 
   beforeAll(async () => {
     const pumlElements = await loadPlantumlElements("C4L2.puml");
-    containersFromPuml = mapContainersFromPlantumlElements(pumlElements).allContainers;
+    containersFromPuml =
+      mapContainersFromPlantumlElements(pumlElements).allContainers;
   });
 
   it("only crud can relate to DB", () => {
@@ -19,7 +20,12 @@ describe("Architecture", () => {
       const dbRelation = container.relations.filter(
         (r) => r.to.type === ContainerDb,
       );
-      if (!container.tags?.includes("repo") && dbRelation.length > 0) 
+      if (!container.tags?.includes("repo") && dbRelation.length > 0) fail();
+
+      if (
+        container.tags?.includes("repo") &&
+        container.relations.some((r) => r.to.type != ContainerDb)
+      )
         fail();
     }
   });
