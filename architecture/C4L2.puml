@@ -38,7 +38,6 @@ Rel(bff, goods_acl, "")
 Rel(goods_acl, goods_repository, "", "https://gateway.int.com:443/goods/v1")
 Rel(goods_acl, goods2_repository, "", "https://gateway.int.com:443/goods2/v1")
 
-Rel(bff, task_repository, "")
 Rel(task_repository, task_repository_db, "")
 
 Rel(bff, invoice_repository, "")
