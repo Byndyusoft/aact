@@ -14,7 +14,6 @@ const addDependency = (
 ): void => {
   const containerFrom = containers.find((x) => x.name === relation.from);
   if (!containerFrom) return;
-  if (relation.to.endsWith("_db")) return;
   const containerTo = containers.find((x) => x.name === relation.to);
   if (!containerTo) return;
   containerFrom.relations.push({

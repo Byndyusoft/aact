@@ -9,14 +9,18 @@ import {
   Stdlib_C4_Context,
   Stdlib_C4_Dynamic_Rel,
   UMLElement,
+  Comment
 } from "plantuml-parser";
 
 const filterElements = (elements: UMLElement[]): UMLElement[] => {
   const result: UMLElement[] = [];
 
   for (const element of elements) {
+    if(element instanceof Comment)
+    continue;
     if (
       (element as Stdlib_C4_Container_Component).type_.name === "Container" ||
+      (element as Stdlib_C4_Container_Component).type_.name === "ContainerDb" ||
       (element as Stdlib_C4_Context).type_.name === "System_Ext"
     ) {
       result.push(element);
