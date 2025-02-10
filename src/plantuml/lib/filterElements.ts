@@ -16,7 +16,10 @@ export const filterElements = (elements: UMLElement[]): UMLElement[] => {
     if (
       (element as Stdlib_C4_Container_Component).type_.name === "Container" ||
       (element as Stdlib_C4_Container_Component).type_.name === "ContainerDb" ||
+      (element as Stdlib_C4_Container_Component).type_.name === "Component" ||
       (element as Stdlib_C4_Context).type_.name === "System_Ext" ||
+      (element as Stdlib_C4_Context).type_.name === "System" ||
+      (element as Stdlib_C4_Context).type_.name === "Person" ||
       element instanceof Stdlib_C4_Dynamic_Rel ||
       element instanceof Relationship
     ) {
@@ -25,7 +28,9 @@ export const filterElements = (elements: UMLElement[]): UMLElement[] => {
 
     const elementAsBoundary = element as Stdlib_C4_Boundary;
     if (
-      ["System_Boundary", "Boundary"].includes(elementAsBoundary.type_.name)
+      ["System_Boundary", "Container_Boundary", "Boundary"].includes(
+        elementAsBoundary.type_.name,
+      )
     ) {
       result.push(elementAsBoundary);
       const resultFromBoundary = filterElements(elementAsBoundary.elements);

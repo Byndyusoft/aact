@@ -26,7 +26,7 @@ export const groupElements = (elements: UMLElement[]) => {
     ) {
       result.relations.push(element as Stdlib_C4_Dynamic_Rel);
     } else if (
-      ["System_Boundary", "Boundary"].includes(
+      ["System_Boundary", "Container_Boundary", "Boundary"].includes(
         (element as Stdlib_C4_Boundary).type_.name,
       )
     ) {

@@ -1,10 +1,10 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-import { UMLElement } from "plantuml-parser";
 
 import {
   ArchitectureElements,
   groupElements,
 } from "./plantuml/lib/groupElements";
+import { loadPlantumlElements } from "./plantuml";
 
 interface AnalyzedArchitecture {
   elements: ArchitectureElements;
@@ -23,20 +23,21 @@ interface DatabasesInfo {
   consumes: number;
 }
 
+const apiTechologies = ["http", "grpc", "tcp"];
+
 const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
   const asyncApiCalls = elements.relations.filter((it) =>
     (it.descr ?? "").includes("async"),
   );
-  const syncApiCalls = elements.relations.filter(
-    // (it) => it.descr !== "async" && (it.techn ?? "").includes("http"),
-    (it) => {
-      const component = elements.components.find((ct) => ct.alias === it.to);
-      return (
-        it.descr !== "async" &&
-        (component!.type_.name as string) === "System_Ext"
-      );
-    },
-  );
+  const syncApiCalls = elements.relations.filter((it) => {
+    const component = elements.components.find((ct) => ct.alias === it.to);
+    const isExternalApi = (component!.type_.name as string) === "System_Ext";
+    const isApiTechnology = apiTechologies.some((apiTechn) =>
+      (it.techn ?? "").toLowerCase().includes(apiTechn),
+    );
+
+    return it.descr !== "async" && (isExternalApi || isApiTechnology);
+  });
 
   return {
     elementsCount: elements.components.length,
@@ -61,10 +62,11 @@ const analyzeDatabases = (elements: ArchitectureElements): DatabasesInfo => {
   };
 };
 
-export const analyzeArchitecture = (
-  elements: UMLElement[],
-): AnalyzedArchitecture => {
-  const groupedElements = groupElements(elements);
+export const analyzeArchitecture = async (
+  filename: string,
+): Promise<AnalyzedArchitecture> => {
+  const pumlElements = await loadPlantumlElements(filename);
+  const groupedElements = groupElements(pumlElements);
 
   return {
     elements: groupedElements,
