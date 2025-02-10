@@ -1,9 +1,9 @@
-import { Container } from "./entities";
-import { Relation } from "./entities/relation";
+import { Container } from "../src/entities";
+import { Relation } from "../src/entities/relation";
 import {
   loadPlantumlElements,
   mapContainersFromPlantumlElements,
-} from "./plantuml";
+} from "../src/plantuml";
 
 describe("Architecture", () => {
   let containersFromPuml: Container[];

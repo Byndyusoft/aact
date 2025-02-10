@@ -1,8 +1,8 @@
-import { Container } from "./entities";
+import { Container } from "../src/entities";
 import {
   loadPlantumlElements,
   mapContainersFromPlantumlElements,
-} from "./plantuml";
+} from "../src/plantuml";
 
 const ContainerDb = "ContainerDb";
 

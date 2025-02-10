@@ -1,8 +1,8 @@
-import { Container } from "./entities";
+import { Container } from "../src/entities";
 import {
   loadPlantumlElements,
   mapContainersFromPlantumlElements,
-} from "./plantuml";
+} from "../src/plantuml";
 
 const SystemExternalType = "System_Ext";
 
@@ -11,7 +11,8 @@ describe("Architecture", () => {
 
   beforeAll(async () => {
     const pumlElements = await loadPlantumlElements("C4L2.puml");
-    containersFromPuml = mapContainersFromPlantumlElements(pumlElements).allContainers;
+    containersFromPuml =
+      mapContainersFromPlantumlElements(pumlElements).allContainers;
   });
 
   it("only acl can depend on external systems", () => {
@@ -19,7 +20,7 @@ describe("Architecture", () => {
       const externalRelations = container.relations.filter(
         (r) => r.to.type === SystemExternalType,
       );
-      if (!container.tags?.includes("acl") && externalRelations.length > 0) 
+      if (!container.tags?.includes("acl") && externalRelations.length > 0)
         fail();
     }
   });

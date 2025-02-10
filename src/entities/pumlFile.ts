@@ -1,6 +1,5 @@
 import { Container } from "./container";
-import { Boundary } from "./Boundary";
-
+import { Boundary } from "./boundary";
 
 export interface PumlFile {
   readonly boundaries: Boundary[];

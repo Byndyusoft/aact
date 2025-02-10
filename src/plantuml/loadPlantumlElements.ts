@@ -9,15 +9,14 @@ import {
   Stdlib_C4_Context,
   Stdlib_C4_Dynamic_Rel,
   UMLElement,
-  Comment
+  Comment,
 } from "plantuml-parser";
 
 const filterElements = (elements: UMLElement[]): UMLElement[] => {
   const result: UMLElement[] = [];
 
   for (const element of elements) {
-    if(element instanceof Comment)
-    continue;
+    if (element instanceof Comment) continue;
     if (
       (element as Stdlib_C4_Container_Component).type_.name === "Container" ||
       (element as Stdlib_C4_Container_Component).type_.name === "ContainerDb" ||
@@ -50,16 +49,16 @@ const filterElements = (elements: UMLElement[]): UMLElement[] => {
 };
 
 const getFilepath = (fileName: string): string => {
-  return path.join(process.cwd(), "architecture", fileName);
+  return path.join(process.cwd(), "resources/architecture", fileName);
 };
 
-export const loadPlantumlElements = async (fileName: string): Promise<UMLElement[]> => {
+export const loadPlantumlElements = async (
+  fileName: string,
+): Promise<UMLElement[]> => {
   const filepath = getFilepath(fileName);
 
   let data = await fs.readFile(filepath, "utf8");
-  data = data
-    .replaceAll(/, \$tags=(".+?")/g, ", $1")
-    .replaceAll('""', '" "');
+  data = data.replaceAll(/, \$tags=(".+?")/g, ", $1").replaceAll('""', '" "');
   const [{ elements }] = parsePuml(data);
 
   return filterElements(elements);
