@@ -23,7 +23,7 @@ interface DatabasesInfo {
   consumes: number;
 }
 
-const apiTechologies = ["http", "grpc", "tcp"];
+const apiTechnologies = ["http", "grpc", "tcp"];
 
 const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
   const asyncApiCalls = elements.relations.filter((it) =>
@@ -32,7 +32,7 @@ const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
   const syncApiCalls = elements.relations.filter((it) => {
     const component = elements.components.find((ct) => ct.alias === it.to);
     const isExternalApi = (component!.type_.name as string) === "System_Ext";
-    const isApiTechnology = apiTechologies.some((apiTechn) =>
+    const isApiTechnology = apiTechnologies.some((apiTechn) =>
       (it.techn ?? "").toLowerCase().includes(apiTechn),
     );
 
