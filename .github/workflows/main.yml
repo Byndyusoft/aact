@@ -28,12 +28,12 @@ jobs:
         run: wget -O /opt/plantuml.jar https://sourceforge.net/projects/plantuml/files/plantuml.jar/download
 
       - name: generate svg diagrams
-        run: java -jar /opt/plantuml.jar -tsvg "./architecture/*.puml"
+        run: java -jar /opt/plantuml.jar -tsvg "./resources/architecture/*.puml"
 
       - name: push svg diagrams
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "docs: render PlantUML files"
-          file_pattern: ./architecture/*.svg
+          file_pattern: ./resources/architecture/*.svg
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
