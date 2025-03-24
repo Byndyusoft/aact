@@ -1,0 +1,49 @@
+@startuml "Demo Coupling And Cohesion"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Ext(ext, "Внешняя система")
+System_Ext(ext2, "Внешняя система 2")
+System_Ext(ext3, "Внешняя система 3")
+
+Boundary(boundary0, "Наш проект"){
+
+        Boundary(boundary1, "Контекст 1"){
+                Container(service1, "Микросервис A")
+                Container(service2, "Микросервис B")
+                Container(service3, "Микросервис C")
+                Container(service_a12, "Адаптер к контексту 2")
+        }
+
+        Boundary(boundary2, "Контекст 2"){
+                Container(service4, "Микросервис X")
+                Container(service5, "Микросервис Y")
+        }
+
+        Boundary(boundary3, "Контекст Адаптеров"){
+                Container(service_a1, "Адаптер 1")
+                Container(service_a2, "Адаптер 2")
+                Container(service_a3, "Адаптер 3")
+        }
+}
+
+Rel(service1, service2, "")
+Rel(service1, service3, "")
+Rel(service2, service3, "")
+
+Rel_R(service1, service_a12, "")
+Rel_R(service2, service_a12, "")
+Rel(service_a12, service5, "")
+Rel(service_a12, service4, "")
+
+Rel(service4, service5, "")
+
+Rel(service3, service_a1, "")
+Rel(service3, service_a2, "")
+Rel(service3, service_a3, "")
+
+Rel(service_a1, ext, "")
+Rel(service_a2, ext2, "")
+Rel(service_a3, ext3, "")
+
+@enduml
