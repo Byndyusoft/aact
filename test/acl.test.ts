@@ -21,7 +21,7 @@ describe("Architecture", () => {
         (r) => r.to.type === SystemExternalType,
       );
       if (!container.tags?.includes("acl") && externalRelations.length > 0)
-        fail();
+        throw new Error('Assertion failed');
     }
   });
 });

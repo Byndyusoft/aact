@@ -25,13 +25,13 @@ describe("Architecture", () => {
         !container.tags?.includes("relay") &&
         dbRelation.length > 0
       )
-        fail();
-
+        throw new Error('Assertion failed');
+        
       if (
         container.tags?.includes("repo") &&
         container.relations.some((r) => r.to.type != ContainerDb)
       )
-        fail();
+        throw new Error('Assertion failed');
     }
   });
 });

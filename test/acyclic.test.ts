@@ -21,7 +21,8 @@ describe("Architecture", () => {
 
     function findCycle(rels: Relation[], sourceContainerName: string) {
       for (const rel of rels) {
-        if (rel.to.name == sourceContainerName) fail();
+        if (rel.to.name == sourceContainerName) 
+          throw new Error('Assertion failed');
         findCycle(rel.to.relations, sourceContainerName);
       }
     }
