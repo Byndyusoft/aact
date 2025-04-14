@@ -9,7 +9,13 @@ import { Stdlib_C4_Boundary } from "plantuml-parser/dist/types";
 export interface ArchitectureElements {
   components: Stdlib_C4_Container_Component[];
   relations: Stdlib_C4_Dynamic_Rel[];
-  boundaries: Stdlib_C4_Boundary[];
+  boundaries: ArchitectureBoundary[];
+}
+
+export interface ArchitectureBoundary {
+  boundary: Stdlib_C4_Boundary;
+  coupling: number;
+  cohesion: number;
 }
 
 export const groupElements = (elements: UMLElement[]) => {
@@ -30,7 +36,11 @@ export const groupElements = (elements: UMLElement[]) => {
         (element as Stdlib_C4_Boundary).type_.name,
       )
     ) {
-      result.boundaries.push(element as Stdlib_C4_Boundary);
+      result.boundaries.push({
+        boundary: element as Stdlib_C4_Boundary,
+        coupling: 0,
+        cohesion: 0
+      });
     } else {
       result.components.push(element as Stdlib_C4_Container_Component);
     }
