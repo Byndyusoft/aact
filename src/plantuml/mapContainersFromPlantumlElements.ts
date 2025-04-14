@@ -6,7 +6,7 @@ import {
   UMLElement,
 } from "plantuml-parser";
 
-import { Container, PumlFile, Boundary } from "../entities";
+import { Boundary,Container, PumlFile } from "../entities";
 
 const addDependency = (
   containers: Container[],

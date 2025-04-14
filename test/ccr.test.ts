@@ -11,5 +11,7 @@ describe("Cascade coupling reduction", () => {
     const BoundariesReport = await analyzeArchitecture("boundaries.puml");
 
     console.log(L2Report, L3Report, BoundariesReport);
+    // console.log(BoundariesReport);
+
   });
 });

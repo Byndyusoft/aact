@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/prevent-abbreviations */
 
-import { Stdlib_C4_Container_Component } from "plantuml-parser";
+import { Stdlib_C4_Boundary, Stdlib_C4_Container_Component } from "plantuml-parser";
 
 import {
   ArchitectureElements,
@@ -42,13 +42,26 @@ const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
   });
 
   for (const archBoundary of elements.boundaries) {
+    const parentBoundary = elements.boundaries
+      .find(b=>b.boundary.elements.some(e=>(e as Stdlib_C4_Boundary).alias === archBoundary.boundary.alias));
+
     for (const relation of elements.relations) {
       if(archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.from))
       {
         if(archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.to))
           archBoundary.cohesion++;
         else
-          archBoundary.coupling++;
+        {
+          if(!parentBoundary || parentBoundary.boundary.elements.some(b=>(b as Stdlib_C4_Boundary)
+            .elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.to)))
+          {
+            archBoundary.coupling++;
+            if(parentBoundary)
+              parentBoundary.cohesion++;
+          }
+          else
+            parentBoundary.coupling++;
+        }
       }
     }
   }
