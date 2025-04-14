@@ -1,11 +1,12 @@
 /* eslint-disable unicorn/prevent-abbreviations */
 
+import { Stdlib_C4_Container_Component } from "plantuml-parser";
+
 import {
   ArchitectureElements,
   groupElements,
 } from "./plantuml/lib/groupElements";
 import { loadPlantumlElements } from "./plantuml";
-import { Stdlib_C4_Container_Component } from "plantuml-parser";
 
 interface AnalyzedArchitecture {
   elements: ArchitectureElements;
@@ -17,8 +18,6 @@ interface AnalysisReport {
   syncApiCalls: number;
   asyncApiCalls: number;
   databases: DatabasesInfo;
-  coupling: number;
-  cohesion: number;
 }
 
 interface DatabasesInfo {
@@ -42,24 +41,23 @@ const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
     return it.descr !== "async" && (isExternalApi || isApiTechnology);
   });
 
-  elements.boundaries.forEach(archBoundary => {
-    archBoundary.cohesion = elements.relations.filter((it) => { 
-        return archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === it.from) &&
-          archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === it.to)
-    }).length;
-    archBoundary.coupling = elements.relations.filter((it) => { 
-        return archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === it.from) &&
-          !archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === it.to)
-    }).length;
-  });
+  for (const archBoundary of elements.boundaries) {
+    for (const relation of elements.relations) {
+      if(archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.from))
+      {
+        if(archBoundary.boundary.elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.to))
+          archBoundary.cohesion++;
+        else
+          archBoundary.coupling++;
+      }
+    }
+  }
 
   return {
     elementsCount: elements.components.length,
     syncApiCalls: syncApiCalls.length,
     asyncApiCalls: asyncApiCalls.length,
-    databases: analyzeDatabases(elements),
-    coupling: 0,
-    cohesion: 0
+    databases: analyzeDatabases(elements)
   };
 };
 

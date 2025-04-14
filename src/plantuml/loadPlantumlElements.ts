@@ -20,11 +20,12 @@ export const loadPlantumlElements = async (
 
   for (const element of elements) {
     if (element instanceof Comment) continue;
-    if((element as Stdlib_C4_Dynamic_Rel).type_.name.startsWith("Rel_Back"))
+    const relation = element as Stdlib_C4_Dynamic_Rel;
+    if(relation.type_.name.startsWith("Rel_Back"))
     {
-      const from = (element as Stdlib_C4_Dynamic_Rel).from;
-      (element as Stdlib_C4_Dynamic_Rel).from = (element as Stdlib_C4_Dynamic_Rel).to;
-      (element as Stdlib_C4_Dynamic_Rel).to = from;
+      const from = relation.from;
+      relation.from = relation.to;
+      relation.to = from;
     }
   }
 

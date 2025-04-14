@@ -5,10 +5,11 @@ import { analyzeArchitecture } from "../src/analyzer";
  */
 describe("Cascade coupling reduction", () => {
   it("test1", async () => {
-    const L1Report = await analyzeArchitecture("banking/C4L1.puml");
     const L2Report = await analyzeArchitecture("banking/C4L2.puml");
     const L3Report = await analyzeArchitecture("banking/C4L3.puml");
 
-    console.log(L1Report, L2Report, L3Report);
+    const BoundariesReport = await analyzeArchitecture("boundaries.puml");
+
+    console.log(L2Report, L3Report, BoundariesReport);
   });
 });
