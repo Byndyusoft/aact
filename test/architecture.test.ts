@@ -4,16 +4,16 @@ import path from "path";
 
 import { Stdlib_C4_Dynamic_Rel } from "plantuml-parser";
 
-import { Container } from "./entities";
+import { Container } from "../src/entities";
 import {
   DeployConfig,
   loadMicroserviceDeployConfigs,
   mapFromConfigs,
-} from "./deployConfigs";
+} from "../src/deployConfigs";
 import {
   loadPlantumlElements,
   mapContainersFromPlantumlElements,
-} from "./plantuml";
+} from "../src/plantuml";
 
 const SystemExternalType = "System_Ext";
 const ContainerType = "Container";
@@ -29,7 +29,8 @@ describe("Architecture", () => {
     deployConfigs = mapFromConfigs(await loadMicroserviceDeployConfigs());
 
     const pumlElements = await loadPlantumlElements("C4L2.puml");
-    containersFromPuml = mapContainersFromPlantumlElements(pumlElements).allContainers;
+    containersFromPuml =
+      mapContainersFromPlantumlElements(pumlElements).allContainers;
 
     deployConfigsForContainers = deployConfigs.filter((x) =>
       containersFromPuml.find((y) => x.name === y.name),
@@ -195,12 +196,14 @@ describe("Architecture", () => {
           ),
         ),
       ].every((relation) => {
-        const result = relation.to.name.endsWith("_db") || config.sections.some(
-          (configSection) =>
-            configSection.name === relation.to.name ||
-            (configSection.prod_value &&
-              relation.technology?.includes(configSection.prod_value)),
-        );
+        const result =
+          relation.to.name.endsWith("_db") ||
+          config.sections.some(
+            (configSection) =>
+              configSection.name === relation.to.name ||
+              (configSection.prod_value &&
+                relation.technology?.includes(configSection.prod_value)),
+          );
 
         if (!result && verbose)
           console.log(
@@ -212,7 +215,11 @@ describe("Architecture", () => {
   }
 
   it("generate puml from configs", async () => {
-    const filepath = path.join(process.cwd(), "architecture", "generated.puml");
+    const filepath = path.join(
+      process.cwd(),
+      "resources/architecture",
+      "generated.puml",
+    );
     let data = `@startuml "Demo Generated"
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 LAYOUT_WITH_LEGEND()
@@ -284,10 +291,7 @@ Boundary(project, "Our system"){
         )
       ) {
         var transportAttribute = "";
-        if (
-          !intContainers.includes(toName) &&
-          !extSystems.includes(toName)
-        ) {
+        if (!intContainers.includes(toName) && !extSystems.includes(toName)) {
           data += `System_Ext(${toName}, "${toName}", " ")
 `;
           extSystems.push(toName);

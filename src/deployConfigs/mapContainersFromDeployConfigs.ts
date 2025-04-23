@@ -1,6 +1,6 @@
 import { Section } from "../entities";
 
-import { DeployConfig } from ".";
+import { DeployConfig } from "./index";
 
 const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
   const envWhitelist = [
@@ -49,7 +49,10 @@ const mapFromConfig = (deployConfig: DeployConfig): DeployConfig => {
       }
       return relation;
     });
-  deployConfig.name = (deployConfig.name ?? deployConfig.fileName).replace(/[\s-\(\)]/g, "_");
+  deployConfig.name = (deployConfig.name ?? deployConfig.fileName).replace(
+    /[\s-\(\)]/g,
+    "_",
+  );
   deployConfig.sections = sections;
 
   return deployConfig;

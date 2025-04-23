@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 
-import { Boundary, PumlFile } from "./entities";
+import { Boundary, PumlFile } from "../src/entities";
 
 import {
   loadPlantumlElements,
   mapContainersFromPlantumlElements,
-} from "./plantuml";
+} from "../src/plantuml";
 
 const SystemExternalType = "System_Ext";
 const ContainerType = "Container";
@@ -36,10 +36,10 @@ describe("Architecture", () => {
       console.log(
         boundary.label + " — Cohesion: " + cohesion + "; Coupling: " + coupling,
       );
-      // во-первых, внутренняя прочность периметра должна быть больше внешней связанности 
+      // во-первых, внутренняя прочность периметра должна быть больше внешней связанности
       expect(cohesion).toBeGreaterThan(coupling);
 
-      // во-вторых, если у периметр содержит в себе другие периметры — его прочность должна быть меньше суммы прочностей внутренних периметров 
+      // во-вторых, если у периметр содержит в себе другие периметры — его прочность должна быть меньше суммы прочностей внутренних периметров
       if (boundary.boundaries.length > 0)
         expect(cohesion).toBeLessThan(
           boundary.boundaries.reduce(
