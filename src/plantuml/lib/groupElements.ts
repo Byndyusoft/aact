@@ -14,7 +14,7 @@ export interface ArchitectureElements {
 
 export interface ArchitectureBoundary {
   boundary: Stdlib_C4_Boundary;
-  coupling: number;
+  couplingRelations: Stdlib_C4_Dynamic_Rel[];
   cohesion: number;
 }
 
@@ -38,7 +38,7 @@ export const groupElements = (elements: UMLElement[]) => {
     ) {
       result.boundaries.push({
         boundary: element as Stdlib_C4_Boundary,
-        coupling: 0,
+        couplingRelations: [],
         cohesion: 0
       });
     } else {

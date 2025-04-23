@@ -55,12 +55,13 @@ const analyzeElements = (elements: ArchitectureElements): AnalysisReport => {
           if(!parentBoundary || parentBoundary.boundary.elements.some(b=>(b as Stdlib_C4_Boundary)
             .elements.some(e=>(e as Stdlib_C4_Container_Component).alias === relation.to)))
           {
-            archBoundary.coupling++;
-            if(parentBoundary)
+            archBoundary.couplingRelations.push(relation);
+            if(parentBoundary) {
               parentBoundary.cohesion++;
+            }
           }
           else
-            parentBoundary.coupling++;
+            parentBoundary.couplingRelations.push(relation);
         }
       }
     }
