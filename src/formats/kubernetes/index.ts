@@ -1,6 +1,21 @@
+import * as v from "valibot";
+
+import { imageHeuristicSchema } from "../_shared/optionsSchema";
 import type { Format } from "../types";
 import { generate } from "./generate";
 import { load } from "./load";
+
+/** Mirrors `KubernetesLoadOptions` (types.ts) — keep in sync. */
+export const kubernetesLoadOptionsSchema = v.strictObject({
+  annotations: v.optional(
+    v.strictObject({
+      prefix: v.optional(v.string()),
+    }),
+  ),
+  namespaces: v.optional(v.array(v.string())),
+  skip: v.optional(v.array(v.string())),
+  imageHeuristic: v.optional(imageHeuristicSchema),
+});
 
 /**
  * Kubernetes Format — `load` + `generate`.
@@ -28,6 +43,7 @@ import { load } from "./load";
  */
 export const kubernetesFormat: Format = {
   name: "kubernetes",
+  loadOptionsSchema: kubernetesLoadOptionsSchema,
   load,
   generate,
 };

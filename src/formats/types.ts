@@ -1,3 +1,5 @@
+import type { GenericSchema } from "valibot";
+
 import type { Element, Model, ModelIssue } from "../model";
 
 /**
@@ -112,6 +114,13 @@ export interface LoadResult {
 export interface Format {
   readonly name: string;
   readonly defaultPattern?: string | readonly string[];
+  /**
+   * valibot-схема для `AactConfig.source.options` этого формата.
+   * `loadConfig` валидирует опции ею сразу после резолва `source.type`
+   * — опечатка в ключе падает как `config.invalidSchema`, а не молча
+   * игнорируется loader'ом. Формат без схемы опций не принимает.
+   */
+  readonly loadOptionsSchema?: GenericSchema;
   /**
    * `options` — per-Format escape hatch. Каждый Format типизирует свою
    * options shape в собственном модуле; формат, которому опции не нужны,

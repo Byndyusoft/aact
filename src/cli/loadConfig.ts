@@ -154,6 +154,39 @@ const loadRawConfig = async (
   }
 };
 
+/**
+ * `source.options` — per-format shape, so the top-level schema can't
+ * check it; the format does, through `Format.loadOptionsSchema`. A
+ * format without a schema takes no options at all — silently ignoring
+ * a mistyped block is exactly the failure this guards against.
+ */
+const validateSourceOptions = async (
+  type: string,
+  options: unknown,
+  configPath: string | undefined,
+): Promise<void> => {
+  const format = await loadFormat(type);
+  const details: Record<string, string> = configPath
+    ? { path: configPath, type }
+    : { type };
+  if (format.loadOptionsSchema === undefined) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `source.options is not accepted for format "${type}": it has no load options. Remove the block from aact.config.ts.`,
+      details,
+    );
+  }
+  try {
+    v.parse(format.loadOptionsSchema, options);
+  } catch (error) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `source.options for format "${type}" failed schema validation: ${describeError(error)}`,
+      details,
+    );
+  }
+};
+
 const parseConfig = (
   raw: unknown,
   configPath: string | undefined,
@@ -228,6 +261,10 @@ export const loadAndValidateConfig = async (
       `Unknown source.type "${type}" in aact.config.ts (known: ${knownFormatNames().join(", ")}).`,
       { type },
     );
+  }
+
+  if (sourceOptions !== undefined) {
+    await validateSourceOptions(type, sourceOptions, configFile ?? undefined);
   }
 
   const customRules = parsed.customRules

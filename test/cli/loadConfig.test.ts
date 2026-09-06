@@ -221,3 +221,84 @@ describe("loadAndValidateConfig", () => {
     });
   });
 });
+
+describe("loadAndValidateConfig — source.options", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("accepts kubernetes options that match the format schema", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "kubernetes",
+          path: "./k8s",
+          options: { namespaces: ["shop"], skip: ["debug-*"] },
+        },
+      },
+    });
+    const { config } = await loadAndValidateConfig();
+    expect(config.source.options).toEqual({
+      namespaces: ["shop"],
+      skip: ["debug-*"],
+    });
+  });
+
+  it("rejects a mistyped key in kubernetes options", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "kubernetes",
+          path: "./k8s",
+          options: { namespace: ["shop"] },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /source\.options for format "kubernetes" failed schema validation/,
+    );
+  });
+
+  it("rejects an invalid kind in compose imageHeuristic", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "compose",
+          path: "./compose.yaml",
+          options: { imageHeuristic: { "*postgres*": "Database" } },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /source\.options for format "compose"/,
+    );
+  });
+
+  it("accepts a compose naming transform function", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "compose",
+          path: "./compose.yaml",
+          options: { naming: { transform: (key: string) => key } },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).resolves.toBeDefined();
+  });
+
+  it("rejects source.options for a format without load options", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "plantuml",
+          path: "./architecture.puml",
+          options: { anything: true },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /source\.options is not accepted for format "plantuml"/,
+    );
+  });
+});

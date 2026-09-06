@@ -53,13 +53,14 @@ export const AactConfigSchema = v.strictObject({
       /** Optional — infer'ится из `path` через format registry `defaultPattern` если опущен. */
       type: v.optional(v.string()),
       /**
-       * Per-Format опции. Shape специфичен для каждого Format'а
-       * (например `ComposeLoadOptions` / `KubernetesLoadOptions`)
-       * — valibot не валидирует shape глубже потому что Format
-       * registry динамический. Format-loader сам типизирует и
-       * валидирует свои options.
+       * Per-Format опции (`ComposeLoadOptions` / `KubernetesLoadOptions`).
+       * Shape зависит от `source.type`, который известен только после
+       * резолва против format registry, поэтому здесь `unknown`;
+       * `loadConfig` валидирует значение схемой формата
+       * (`Format.loadOptionsSchema`) сразу после резолва типа. Формат
+       * без схемы опций не принимает.
        */
-      options: v.optional(v.any()),
+      options: v.optional(v.unknown()),
     }),
   ]),
   rules: v.optional(
