@@ -25,6 +25,7 @@ import type {
   StructurizrWorkspace,
 } from "./types";
 import {
+  hasExternalTag,
   STRUCTURIZR_INTERACTION_ASYNC,
   STRUCTURIZR_LOCATION_EXTERNAL,
   STRUCTURIZR_TAG_ASYNC,
@@ -70,7 +71,7 @@ const toProperties = (
 
 const isExternal = (system: StructurizrSoftwareSystem): boolean =>
   system.location === STRUCTURIZR_LOCATION_EXTERNAL ||
-  (system.tags?.includes(STRUCTURIZR_LOCATION_EXTERNAL) ?? false);
+  hasExternalTag(parseCsvTags(system.tags));
 
 /**
  * Tags from an exported `workspace.json` carry Structurizr's implicit

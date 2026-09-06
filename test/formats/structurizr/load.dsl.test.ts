@@ -257,3 +257,39 @@ describe("structurizrFormat.load — .dsl edge cases", () => {
     await expect(load(main)).rejects.toThrow(/and \d+ more\./);
   });
 });
+
+describe("structurizrFormat.load — external tag conventions (.dsl)", () => {
+  const writeWorkspace = async (tag: string): Promise<string> => {
+    const dir = await mkdtemp(path.join(tmpdir(), "aact-ext-"));
+    const file = path.join(dir, "workspace.dsl");
+    await writeFile(
+      file,
+      `workspace "W" {
+  model {
+    app = softwareSystem "App" {
+      api = container "API"
+    }
+    vendor = softwareSystem "Vendor" {
+      tags "${tag}"
+    }
+    api -> vendor "calls"
+  }
+}
+`,
+    );
+    return file;
+  };
+
+  it.each(["External", "external", "External System", "EXTERNAL SYSTEM"])(
+    "treats tag %j as external without any config",
+    async (tag) => {
+      const result = await load(await writeWorkspace(tag));
+      expect(result.model.elements["vendor"]?.external).toBe(true);
+    },
+  );
+
+  it("leaves other tags internal", async () => {
+    const result = await load(await writeWorkspace("Existing System"));
+    expect(result.model.elements["vendor"]?.external).toBe(false);
+  });
+});

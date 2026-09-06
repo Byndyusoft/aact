@@ -480,6 +480,20 @@ describe("structurizr load — external systems", () => {
     expect(getElement(model, "ext")?.external).toBe(true);
   });
 
+  it("treats `external` / `External System` tags as external without config", async () => {
+    for (const tags of ["external", "External System"]) {
+      const model = await loadWorkspace({
+        model: {
+          softwareSystems: [
+            { id: "ext", name: "Vendor", tags, containers: [] },
+          ],
+          people: [],
+        },
+      });
+      expect(getElement(model, "ext")?.external).toBe(true);
+    }
+  });
+
   it("external system tags parse from comma-separated string", async () => {
     const model = await loadWorkspace({
       model: {
