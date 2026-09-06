@@ -230,3 +230,12 @@ describe("Format API — narrowing via type guards", () => {
     }
   });
 });
+
+describe("format registry — source.options contract", () => {
+  it("every built-in format declares a loadOptionsSchema (empty when it takes none)", async () => {
+    for (const name of knownFormatNames()) {
+      const format = await loadFormat(name);
+      expect(format.loadOptionsSchema, name).toBeDefined();
+    }
+  });
+});

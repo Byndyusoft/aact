@@ -1,3 +1,5 @@
+import * as v from "valibot";
+
 import type { Format } from "../types";
 import { generate } from "./generate";
 import { load } from "./load";
@@ -36,6 +38,8 @@ export type { ModelJsonFile } from "./types";
  */
 export const modelJsonFormat: Format = {
   name: "model-json",
+  // No load options: the source file is the whole contract.
+  loadOptionsSchema: v.strictObject({}),
   defaultPattern: "*.aact.json",
   load,
   generate,

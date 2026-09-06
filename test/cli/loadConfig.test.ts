@@ -287,7 +287,7 @@ describe("loadAndValidateConfig — source.options", () => {
     await expect(loadAndValidateConfig()).resolves.toBeDefined();
   });
 
-  it("rejects source.options for a format without load options", async () => {
+  it("rejects source.options for a format whose schema is empty (plantuml)", async () => {
     mockLoadConfig.mockResolvedValue({
       config: {
         source: {
@@ -298,7 +298,7 @@ describe("loadAndValidateConfig — source.options", () => {
       },
     });
     await expect(loadAndValidateConfig()).rejects.toThrow(
-      /source\.options is not accepted for format "plantuml"/,
+      /source\.options for format "plantuml" failed schema validation/,
     );
   });
 });

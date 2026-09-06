@@ -2,12 +2,12 @@
 
 # Formats
 
-Architecture sources aact can load, generate, and auto-fix. Pick one in `aact.config.ts` via `source` — the type is inferred from the path when omitted.
+Architecture sources aact can load, generate, and auto-fix. Pick one in `aact.config.ts` via `source` — the type is inferred from the path when omitted. `source.options` keys are validated against the format's own schema; a format with no options rejects the block.
 
-| Format | Load | Generate | Fix | Default pattern |
-| --- | :---: | :---: | :---: | --- |
-| `plantuml` | ✓ | ✓ | ✓ | `*.puml` |
-| `structurizr` | ✓ | ✓ | ✓ | `workspace.json`, `*.dsl` |
-| `model-json` | ✓ | ✓ |  | `*.aact.json` |
-| `kubernetes` | ✓ | ✓ |  | — |
-| `compose` | ✓ | ✓ |  | `compose.yaml`, `compose.yml`, `docker-compose.yaml`, `docker-compose.yml` |
+| Format | Load | Generate | Fix | Default pattern | `source.options` keys |
+| --- | :---: | :---: | :---: | --- | --- |
+| `plantuml` | ✓ | ✓ | ✓ | `*.puml` | — |
+| `structurizr` | ✓ | ✓ | ✓ | `workspace.json`, `*.dsl` | — |
+| `model-json` | ✓ | ✓ |  | `*.aact.json` | — |
+| `kubernetes` | ✓ | ✓ |  | — | `annotations`, `namespaces`, `skip`, `imageHeuristic` |
+| `compose` | ✓ | ✓ |  | `compose.yaml`, `compose.yml`, `docker-compose.yaml`, `docker-compose.yml` | `naming`, `labels`, `imageHeuristic`, `skip`, `overrides`, `profiles`, `providers`, `models` |

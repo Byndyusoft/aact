@@ -201,7 +201,12 @@ interface FormatRow {
   readonly generate: boolean;
   readonly fix: boolean;
   readonly pattern: string | readonly string[] | undefined;
+  /** Top-level keys of `Format.loadOptionsSchema` (`source.options`). */
+  readonly loadOptions: readonly string[];
 }
+
+const loadOptionsCell = (keys: readonly string[]): string =>
+  keys.length === 0 ? "—" : keys.map((k) => `\`${k}\``).join(", ");
 
 const patternCell = (pattern: FormatRow["pattern"]): string => {
   if (pattern === undefined) return "—";
@@ -212,15 +217,15 @@ const patternCell = (pattern: FormatRow["pattern"]): string => {
 const formatsPage = (formats: readonly FormatRow[]): string => {
   const rows = formats.map(
     (f) =>
-      `| \`${f.name}\` | ${f.load ? "✓" : ""} | ${f.generate ? "✓" : ""} | ${f.fix ? "✓" : ""} | ${patternCell(f.pattern)} |`,
+      `| \`${f.name}\` | ${f.load ? "✓" : ""} | ${f.generate ? "✓" : ""} | ${f.fix ? "✓" : ""} | ${patternCell(f.pattern)} | ${loadOptionsCell(f.loadOptions)} |`,
   );
   return page([
     GENERATED_NOTE,
     "# Formats",
-    "Architecture sources aact can load, generate, and auto-fix. Pick one in `aact.config.ts` via `source` — the type is inferred from the path when omitted.",
+    "Architecture sources aact can load, generate, and auto-fix. Pick one in `aact.config.ts` via `source` — the type is inferred from the path when omitted. `source.options` keys are validated against the format's own schema; a format with no options rejects the block.",
     [
-      "| Format | Load | Generate | Fix | Default pattern |",
-      "| --- | :---: | :---: | :---: | --- |",
+      "| Format | Load | Generate | Fix | Default pattern | `source.options` keys |",
+      "| --- | :---: | :---: | :---: | --- | --- |",
       ...rows,
     ].join("\n"),
   ]);
@@ -285,6 +290,7 @@ const formatRegistry = await jiti.import<{
     generate?: unknown;
     fix?: unknown;
     defaultPattern?: string | readonly string[];
+    loadOptionsSchema?: { entries?: Record<string, unknown> };
   }>;
 }>("../src/formats/registry");
 const formats: FormatRow[] = await Promise.all(
@@ -296,6 +302,7 @@ const formats: FormatRow[] = await Promise.all(
       generate: typeof f.generate === "function",
       fix: f.fix != null,
       pattern: f.defaultPattern,
+      loadOptions: Object.keys(f.loadOptionsSchema?.entries ?? {}),
     };
   }),
 );
