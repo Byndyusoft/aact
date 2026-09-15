@@ -10,6 +10,7 @@ import type {
   Relation,
 } from "../../model";
 import { buildModel, meaningfulTags } from "../../model";
+import { toIncludeError } from "../_shared/includeError";
 import { inferKindFromTechnology } from "../_shared/kindHeuristics";
 import { parseCsvTags } from "../_shared/tags";
 import type { LoadResult } from "../types";
@@ -273,7 +274,9 @@ const expandDslIncludes = async (
   try {
     const text = await fs.readFile(absPath, "utf8");
     const out: string[] = [];
+    let lineNumber = 0;
     for (const line of text.split(/(?<=\n)/u)) {
+      lineNumber += 1;
       let newline = "";
       if (line.endsWith("\r\n")) {
         newline = "\r\n";
@@ -288,7 +291,24 @@ const expandDslIncludes = async (
       }
 
       const includePath = path.resolve(path.dirname(absPath), target);
-      const expanded = await expandDslIncludePath(includePath, stack);
+      let expanded: string;
+      try {
+        expanded = await expandDslIncludePath(includePath, stack);
+      } catch (error) {
+        // Name the missing include, not the workspace file that
+        // references it — the latter is the one file that does exist.
+        throw toIncludeError(
+          error,
+          {
+            missingPath: includePath,
+            target,
+            includedFrom: absPath,
+            line: lineNumber,
+            column: content.length - content.trimStart().length + 1,
+          },
+          "Structurizr DSL",
+        );
+      }
       out.push(expanded);
       if (newline && !expanded.endsWith("\n")) out.push(newline);
     }

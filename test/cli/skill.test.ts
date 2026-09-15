@@ -19,7 +19,7 @@ import type { CliEnvelope } from "../../src/cli/output";
 // We only shell out to a local throwaway git repo (no network) in these tests.
 const { execFileSync } = await import("node:child_process");
 
-const defaultRepo = "https://github.com/Byndyusoft/aact-architect-skill.git";
+const defaultRepo = "https://github.com/ChS23/aact-architect-skill.git";
 const fixedDate = new Date("2026-05-16T00:00:00.000Z");
 
 interface GitCall {

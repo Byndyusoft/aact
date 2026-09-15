@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "pathe";
 
 import type { ModelIssue } from "../../model";
+import { toIncludeError } from "../_shared/includeError";
 import type { LoadResult } from "../types";
 import type { PreParseIssue } from "./parser";
 import type { ChevrotainParseError } from "./parser";
@@ -89,7 +90,9 @@ const expandPlantumlIncludes = async (
   try {
     const raw = await fs.readFile(absPath, "utf8");
     const out: string[] = [];
+    let lineNumber = 0;
     for (const line of raw.split(/(?<=\n)/u)) {
+      lineNumber += 1;
       let newline = "";
       if (line.endsWith("\r\n")) newline = "\r\n";
       else if (line.endsWith("\n")) newline = "\n";
@@ -108,11 +111,28 @@ const expandPlantumlIncludes = async (
       }
       if (include.kind === "include_once") includedOnce.add(includePath);
 
-      const expanded = await expandPlantumlIncludes(
-        includePath,
-        stack,
-        includedOnce,
-      );
+      let expanded: string;
+      try {
+        expanded = await expandPlantumlIncludes(
+          includePath,
+          stack,
+          includedOnce,
+        );
+      } catch (error) {
+        // A missing include must name the include, not the entry point
+        // the CLI happened to be pointed at.
+        throw toIncludeError(
+          error,
+          {
+            missingPath: includePath,
+            target: include.target,
+            includedFrom: absPath,
+            line: lineNumber,
+            column: content.length - content.trimStart().length + 1,
+          },
+          "PlantUML",
+        );
+      }
       out.push(expanded);
       if (newline && !expanded.endsWith("\n")) out.push(newline);
     }

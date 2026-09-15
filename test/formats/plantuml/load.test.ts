@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 
 import path from "pathe";
 
+import { IncludeNotFoundError } from "../../../src/formats/_shared/includeError";
 import { load } from "../../../src/formats/plantuml/load";
 import { plantumlSyntax } from "../../../src/formats/plantuml/syntax";
 import type { Model } from "../../../src/model";
@@ -99,6 +100,49 @@ describe("PlantUML load — unit", () => {
     expect(result.issues).not.toContainEqual(
       expect.objectContaining({ message: expect.stringMatching(/include/i) }),
     );
+  });
+
+  it("names the missing include, not the file that referenced it", async () => {
+    // Regression: a missing !include used to surface as a bare ENOENT,
+    // which the CLI collapsed into "Architecture file not found:
+    // <entry point>" — pointing at the one file that does exist.
+    const file = await writeFixture(
+      "main-missing-include.puml",
+      [
+        "@startuml",
+        "  !include partials/missing.puml",
+        'Container(api, "API")',
+        "@enduml",
+      ].join("\n"),
+    );
+
+    const error = await load(file).catch((error_: unknown) => error_);
+
+    expect(error).toBeInstanceOf(IncludeNotFoundError);
+    expect((error as IncludeNotFoundError).site).toEqual({
+      missingPath: path.join(tmpDir, "partials", "missing.puml"),
+      target: "partials/missing.puml",
+      includedFrom: file,
+      line: 2,
+      column: 3,
+    });
+  });
+
+  it("reports the innermost missing include of a nested chain", async () => {
+    await writeFixture("level1.puml", "!include level2.puml\n");
+    const file = await writeFixture(
+      "main-nested-include.puml",
+      ["@startuml", "!include level1.puml", "@enduml"].join("\n"),
+    );
+
+    const error = await load(file).catch((error_: unknown) => error_);
+
+    expect(error).toBeInstanceOf(IncludeNotFoundError);
+    expect((error as IncludeNotFoundError).site).toMatchObject({
+      missingPath: path.join(tmpDir, "level2.puml"),
+      includedFrom: path.join(tmpDir, "level1.puml"),
+      line: 1,
+    });
   });
 
   it("expands local !include_once only once", async () => {

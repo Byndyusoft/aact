@@ -1,5 +1,6 @@
 export type { BuildEnvelopeInput, ErrorEnvelopeInput } from "./envelope";
 export { buildEnvelope, buildErrorEnvelope, errorResult } from "./envelope";
+export { flushOutput } from "./flush";
 export {
   HumanReporter,
   isErrorEnvelope,

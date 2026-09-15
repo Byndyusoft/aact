@@ -15,7 +15,11 @@ import { jsonArg } from "../sharedArgs";
 
 const skillName = "aact-architect";
 const markerFileName = ".aact-skill.json";
-const defaultRepo = "https://github.com/Byndyusoft/aact-architect-skill.git";
+// The skill lives in its own repo so it can be updated without a CLI
+// release. Byndyusoft/aact-architect-skill does not exist yet — point at
+// the published one until the skill repo is transferred to the org, or
+// `aact skill install` fails on a 404 clone.
+const defaultRepo = "https://github.com/ChS23/aact-architect-skill.git";
 const defaultRef = "main";
 
 const clientValues = [

@@ -1,6 +1,9 @@
+import path from "pathe";
+
 import { issueToDiagnostic, loadModel } from "../../src/cli/loadModel";
 import { ToolError } from "../../src/cli/output";
 import type { AactConfig } from "../../src/config";
+import { IncludeNotFoundError } from "../../src/formats/_shared/includeError";
 import { loadFormat } from "../../src/formats/registry";
 import type { Format } from "../../src/formats/types";
 import type { ModelIssue } from "../../src/model";
@@ -76,6 +79,68 @@ describe("loadModel", () => {
     await expect(loadModel(structurizrConfig)).rejects.toMatchObject({
       name: "ToolError",
       kind: "model.sourceNotFound",
+    });
+  });
+
+  it("throws ToolError model.includeNotFound naming the include, not the entry point", async () => {
+    const load = vi.fn().mockRejectedValue(
+      new IncludeNotFoundError(
+        {
+          missingPath: "/abs/partials/missing.puml",
+          target: "partials/missing.puml",
+          includedFrom: "/abs/architecture.puml",
+          line: 3,
+          column: 1,
+        },
+        "PlantUML",
+      ),
+    );
+    mockLoadFormat.mockResolvedValue(fakeFormat(load));
+
+    const error = (await loadModel(plantumlConfig).catch(
+      (error_: unknown) => error_,
+    )) as ToolError;
+
+    expect(error).toMatchObject({
+      name: "ToolError",
+      kind: "model.includeNotFound",
+      context: {
+        path: "/abs/partials/missing.puml",
+        includedFrom: "/abs/architecture.puml",
+        line: "3",
+        column: "1",
+      },
+    });
+    expect(error.message).toContain("/abs/partials/missing.puml");
+    expect(error.message).toContain("/abs/architecture.puml:3:1");
+  });
+
+  it("attributes a bare ENOENT to the errno path when it isn't the entry point", async () => {
+    // Loaders that pull extra files in without wrapping their own ENOENT
+    // (Structurizr `!include <dir>`, Compose `include:`) still must not
+    // send the reader to source.path.
+    const err = enoent();
+    err.path = "/abs/parts/missing.dsl";
+    const load = vi.fn().mockRejectedValue(err);
+    mockLoadFormat.mockResolvedValue(fakeFormat(load));
+
+    await expect(loadModel(structurizrConfig)).rejects.toMatchObject({
+      name: "ToolError",
+      kind: "model.includeNotFound",
+      message: expect.stringContaining("/abs/parts/missing.dsl"),
+    });
+  });
+
+  it("keeps model.sourceNotFound when the errno path is the entry point itself", async () => {
+    const err = enoent();
+    err.path = path.resolve("./architecture.puml");
+    const load = vi.fn().mockRejectedValue(err);
+    mockLoadFormat.mockResolvedValue(fakeFormat(load));
+
+    await expect(loadModel(plantumlConfig)).rejects.toMatchObject({
+      name: "ToolError",
+      kind: "model.sourceNotFound",
+      message: expect.stringContaining("./architecture.puml"),
     });
   });
 

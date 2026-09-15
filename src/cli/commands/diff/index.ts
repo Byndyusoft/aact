@@ -241,7 +241,7 @@ export const diff = defineCommand({
         },
       });
       await reporter.emit({ envelope });
-      exitWith(envelope.exitCode);
+      await exitWith(envelope.exitCode);
     } catch (error) {
       const envelope = buildErrorEnvelope({
         command: "diff",
@@ -254,7 +254,7 @@ export const diff = defineCommand({
       // reporter — JsonReporter handles null payload, HumanReporter
       // diverts to renderErrorEnvelope.
       await (reporter as unknown as Reporter).emit({ envelope });
-      exitWith(envelope.exitCode);
+      await exitWith(envelope.exitCode);
     }
   },
 });

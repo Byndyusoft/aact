@@ -1,6 +1,6 @@
 {
   "name": "@aact/view",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Local architecture workbench for aact — browser-based live viewer of the normalised C4 Model.",
   "type": "module",
   "license": "GPL-3.0",

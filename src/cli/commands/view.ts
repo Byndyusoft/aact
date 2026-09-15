@@ -66,10 +66,11 @@ const isModuleNotFound = (error: unknown): boolean => {
 
 /**
  * The dist-tag the install hint and prompt target. Tied to the
- * core's release channel — when aact graduates beta, change to
- * `latest` (or drop the qualifier).
+ * core's release channel — `latest` since v3.0.0 GA. Keep the core and
+ * the companion on the same tag: a hint that mixes channels installs
+ * two halves that were never released together.
  */
-const COMPANION_DIST_TAG = "beta";
+const COMPANION_DIST_TAG = "latest";
 const CORE_INSTALL_SPEC = `aact@${COMPANION_DIST_TAG}`;
 const COMPANION_INSTALL_SPEC = `@aact/view@${COMPANION_DIST_TAG}`;
 

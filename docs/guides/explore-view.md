@@ -7,12 +7,12 @@
 и циклы целиком.
 
 ```bash
-npx -p aact@beta -p @aact/view@beta aact view
+npx -p aact -p @aact/view aact view
 ```
 
 `aact view` живёт в отдельном пакете `@aact/view` (чтобы CI и `aact check` не
 тянули фронтенд) — отсюда запуск через `npx -p`. Поставите локально
-(`pnpm add -D aact@beta @aact/view@beta`) — тогда просто `npx aact view`.
+(`pnpm add -D aact @aact/view`) — тогда просто `npx aact view`.
 
 ![Workbench в режиме Expand: Billing раскрыт, Orders и Catalog свёрнуты, справа — детали boundary](assets/explore-view/workbench.png)
 

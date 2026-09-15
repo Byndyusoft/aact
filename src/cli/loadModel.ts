@@ -1,6 +1,7 @@
 import path from "pathe";
 
 import type { AactConfig } from "../config";
+import { IncludeNotFoundError } from "../formats/_shared/includeError";
 import { loadFormat } from "../formats/registry";
 import type { LoadResult } from "../formats/types";
 import { canLoad } from "../formats/types";
@@ -144,7 +145,38 @@ export const loadModel = async (config: AactConfig): Promise<LoadResult> => {
     return await format.load(resolvedPath, config.source.options);
   } catch (error) {
     if (error instanceof ToolError) throw error;
+    // A missing `!include` is a different repair than a missing entry
+    // point: the file to create is the include target, and the file to
+    // edit is the one holding the directive. Reporting `config.source.path`
+    // for both (which is what a bare ENOENT collapses to) sends the reader
+    // to a file that exists and looks fine.
+    if (error instanceof IncludeNotFoundError) {
+      const { site } = error;
+      throw new ToolError(
+        "model.includeNotFound",
+        `Included file not found: ${site.missingPath}. Referenced as "${site.target}" from ${site.includedFrom}:${site.line}:${site.column}. Create the file or fix the include path.`,
+        {
+          path: site.missingPath,
+          target: site.target,
+          includedFrom: site.includedFrom,
+          line: String(site.line),
+          column: String(site.column),
+        },
+      );
+    }
     if (isFileNotFound(error)) {
+      // Fallback for loaders that pull in extra files without wrapping
+      // their own ENOENT (e.g. Structurizr `!include <directory>`, Compose
+      // `include:`): the errno path still names what actually went
+      // missing, so don't blame the entry point for it.
+      const errnoPath = error.path;
+      if (errnoPath !== undefined && path.resolve(errnoPath) !== resolvedPath) {
+        throw new ToolError(
+          "model.includeNotFound",
+          `Referenced file not found: ${errnoPath}. It was pulled in while loading ${config.source.path}; fix the reference in that source.`,
+          { path: errnoPath, includedFrom: resolvedPath },
+        );
+      }
       throw new ToolError(
         "model.sourceNotFound",
         `Architecture file not found: ${config.source.path}. Update source.path in aact.config.ts or run \`aact init\` to scaffold a starter.`,

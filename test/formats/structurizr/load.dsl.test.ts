@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 
 import path from "pathe";
 
+import { IncludeNotFoundError } from "../../../src/formats/_shared/includeError";
 import { load } from "../../../src/formats/structurizr/load";
 
 const ECOMMERCE_DSL = path.resolve(
@@ -204,6 +205,30 @@ describe("structurizrFormat.load — .dsl edge cases", () => {
     );
 
     await expect(load(main)).rejects.toThrow(/include cycle detected/);
+  });
+
+  it("names the missing !include target, not the workspace that references it", async () => {
+    // Regression: the ENOENT of an include used to reach the CLI
+    // indistinguishable from a missing entry point, so the diagnostic
+    // blamed workspace.dsl — a file that is right there.
+    const dir = await mkdtemp(path.join(tmpdir(), "aact-struct-missing-inc-"));
+    const main = path.join(dir, "workspace.dsl");
+    await writeFile(
+      main,
+      `workspace {\n  model {\n    !include parts/missing.dsl\n  }\n}\n`,
+      "utf8",
+    );
+
+    const error = await load(main).catch((error_: unknown) => error_);
+
+    expect(error).toBeInstanceOf(IncludeNotFoundError);
+    expect((error as IncludeNotFoundError).site).toEqual({
+      missingPath: path.join(dir, "parts", "missing.dsl"),
+      target: "parts/missing.dsl",
+      includedFrom: main,
+      line: 3,
+      column: 5,
+    });
   });
 
   it("throws a truncated, readable summary when a .dsl has many parse errors", async () => {

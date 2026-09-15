@@ -16,6 +16,7 @@ import type {
 import {
   buildEnvelope,
   buildErrorEnvelope,
+  flushOutput,
   HumanReporter,
   JsonReporter,
   resolveOutputMode,
@@ -108,7 +109,15 @@ const pickReporter = <TData>(
   }
 };
 
-export const exitWith = (code: ExitCode): never => {
+/**
+ * Terminates the process with `code` — after the standard streams have
+ * drained. `process.exit` is immediate and discards whatever stdout still
+ * has buffered, which truncates piped output at the pipe capacity
+ * (64 KB); `flushOutput` is the barrier that makes the envelope survive
+ * `aact model --json | jq` and subprocess consumers. Await it.
+ */
+export const exitWith = async (code: ExitCode): Promise<never> => {
+  await flushOutput();
   // eslint-disable-next-line n/no-process-exit
   process.exit(code);
 };
@@ -165,7 +174,7 @@ export const cliCommand = <TArgs extends ArgsDef, TData>(
           source: null,
         });
         await reporter.emit(result);
-        exitWith(result.envelope.exitCode);
+        await exitWith(result.envelope.exitCode);
       } catch (error) {
         const envelope = buildErrorEnvelope({
           command: opts.name,
@@ -175,7 +184,7 @@ export const cliCommand = <TArgs extends ArgsDef, TData>(
           source: null,
         });
         await reporter.emit({ envelope } as CommandResult<TData>);
-        exitWith(envelope.exitCode);
+        await exitWith(envelope.exitCode);
       }
     },
   });
@@ -241,7 +250,7 @@ export const cliCommandWithConfig = <TArgs extends ArgsDef, TData>(
           source: null,
         });
         await reporter.emit({ envelope } as CommandResult<TData>);
-        exitWith(envelope.exitCode);
+        await exitWith(envelope.exitCode);
         // exitWith is typed `never`, but tests mock process.exit to a no-op
         // — explicit return makes the post-condition (config !== null below)
         // hold in both contexts.
@@ -269,7 +278,7 @@ export const cliCommandWithConfig = <TArgs extends ArgsDef, TData>(
           source: resolvedSource,
         });
         await reporter.emit(result);
-        exitWith(result.envelope.exitCode);
+        await exitWith(result.envelope.exitCode);
       } catch (error) {
         const envelope = buildErrorEnvelope({
           command: opts.name,
@@ -279,7 +288,7 @@ export const cliCommandWithConfig = <TArgs extends ArgsDef, TData>(
           source: resolvedSource,
         });
         await reporter.emit({ envelope } as CommandResult<TData>);
-        exitWith(envelope.exitCode);
+        await exitWith(envelope.exitCode);
       }
     },
   });

@@ -328,6 +328,58 @@ describe("aact model", () => {
     expect(model).toHaveProperty("rootBoundaryNames");
   });
 
+  it("--json survives a pipe larger than the 64 KB pipe buffer", async () => {
+    // Regression: `process.exit` right after an async write dropped
+    // everything stdout still had buffered, so a piped consumer got the
+    // envelope cut at exactly 65536 bytes — invalid JSON. Only a real
+    // subprocess with a piped stdout reproduces it; a TTY or a file
+    // redirect writes synchronously and hides the bug.
+    const containers = Array.from(
+      { length: 300 },
+      (_, i) =>
+        `  Container(svc${i}, "Service ${i}", "Node.js", "Does thing ${i} with a description long enough to inflate the payload")`,
+    ).join("\n");
+    const relations = Array.from(
+      { length: 299 },
+      (_, i) => `Rel(svc${i}, svc${i + 1}, "calls ${i}", "HTTP/JSON")`,
+    ).join("\n");
+    await fs.writeFile(
+      path.join(workDir, "big.puml"),
+      `@startuml\nSystem_Boundary(sb, "Shop") {\n${containers}\n}\n${relations}\n@enduml\n`,
+    );
+
+    const result = await runCli(["model", "big.puml", "--json"]);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.length).toBeGreaterThan(65_536);
+    const envelope = JSON.parse(result.stdout) as Record<string, unknown>;
+    const data = envelope.data as { model: { elements: object } };
+    expect(Object.keys(data.model.elements)).toHaveLength(300);
+  });
+
+  it("--json names the missing !include, not the entry point", async () => {
+    await fs.writeFile(
+      path.join(workDir, "main.puml"),
+      `@startuml\n!include partials/missing.puml\nContainer(api, "API")\n@enduml\n`,
+    );
+
+    const result = await runCli(["model", "main.puml", "--json"]);
+
+    expect(result.exitCode).toBe(2);
+    const envelope = JSON.parse(result.stdout) as {
+      diagnostics: {
+        kind: string;
+        message: string;
+        context: Record<string, string>;
+      }[];
+    };
+    const diagnostic = envelope.diagnostics[0];
+    expect(diagnostic.kind).toBe("model.includeNotFound");
+    expect(diagnostic.message).toContain("partials/missing.puml");
+    expect(diagnostic.context.includedFrom).toContain("main.puml");
+    expect(diagnostic.context.line).toBe("2");
+  });
+
   it("--json exits 2 on missing source file (model command never crashes)", async () => {
     await runCli(["init"]);
     await fs.rm(path.join(workDir, "architecture.puml"));

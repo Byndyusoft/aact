@@ -26,6 +26,7 @@ export type DiagnosticKind =
   | "model.loaderWarning"
   // Model load-time errors
   | "model.sourceNotFound"
+  | "model.includeNotFound"
   | "model.parseError"
   | "model.unsupportedLoad"
   // Config layer

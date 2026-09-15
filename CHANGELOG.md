@@ -4,6 +4,62 @@ All notable changes to `aact` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v3.0.1 — 2026-09-06
+
+> Patch release. The `--json` envelope now survives a pipe, a missing
+> `!include` names itself, and `aact view` / `aact skill install` point at
+> targets that exist. It also carries the post-GA review fixes that were
+> merged upstream after v3.0.0 — including one breaking change to the
+> `FormatSyntax` plugin surface, kept in a patch because it shipped with
+> those fixes.
+
+### Fixed
+
+- **`--json` output is no longer truncated at 65536 bytes when stdout is a
+  pipe.** The CLI called `process.exit` immediately after an async stdout
+  write, so whatever the pipe had not drained was discarded: any consumer
+  reading the envelope from a subprocess got invalid JSON once the payload
+  passed the pipe buffer — a ~40-element model is already past it. The exit
+  path now waits for both standard streams to reach the OS. Redirecting to a
+  file or writing to a TTY was never affected, which is how this survived to
+  GA.
+- **A missing local `!include` names the include, not the entry point.** The
+  loaders' `ENOENT` reached the CLI indistinguishable from a missing source
+  file, so the diagnostic read `Architecture file not found: <entry point>` —
+  the one file that was fine. Both the C4-PlantUML and the Structurizr DSL
+  loader now report `model.includeNotFound` with the missing path, the file
+  holding the directive, and its line and column; nested chains report the
+  innermost site.
+- **`aact view` opens an authorised URL.** `listhen` opens its own `baseURL`,
+  so the per-session token is passed there instead of being appended after
+  `listen()` returned — the browser no longer lands on an unauthorised bare
+  URL.
+- **`aact view` install hints target the stable channel.** They still told
+  users to install `aact@beta` / `@aact/view@beta` after GA.
+- **`aact skill install` clones a repository that exists.** The default clone
+  target had moved to `Byndyusoft/aact-architect-skill` ahead of the repo
+  transfer, so the documented way for an agent to install the skill failed on
+  a 404. It points back at `ChS23/aact-architect-skill` until the transfer
+  happens.
+- **`aact generate` reports bad output instead of writing it.** Element or
+  boundary names that cannot become a DNS-1123 Kubernetes name, two names
+  that normalise to the same one, absolute or directory-escaping generated
+  paths, and two artefacts claiming one path now surface as
+  `format.invalidGeneratedName`, `format.unsafeOutputPath` and
+  `format.outputPathCollision`.
+
+### Changed
+
+- **BREAKING: `FormatSyntax.containerDecl` takes the Model `Element`**
+  instead of `(name, label, tags)`. Rebuilding a declaration from three
+  positional fields silently dropped description, technology, link and user
+  properties, so an auto-fix that re-declared a container erased model data.
+  Custom rules that call `containerDecl`, and formats that implement it, must
+  pass / accept the element. This is a breaking change in a patch release: it
+  landed with the post-GA review fixes merged upstream, and is documented
+  here rather than renumbered. The JSON contract is untouched —
+  `schemaVersion` stays `1`.
+
 ## v3.0.0 — 2026-06-21
 
 > First stable v3. `schemaVersion: 1` is now frozen as the public contract.
