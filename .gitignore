@@ -219,3 +219,4 @@ docs/research/
 ### Studied for grammar and behaviour only, never copied verbatim into this repo (license firewall).
 .parser-refs/
 *.bak
+.tmp/
