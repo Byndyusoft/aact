@@ -1,0 +1,5 @@
+{
+  "Orders": ["bc:orders"],
+  "Inventory.Contracts": ["bc:inventory"],
+  "Inventory.Internal": ["bc:inventory"]
+}

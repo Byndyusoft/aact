@@ -26,6 +26,10 @@ export default tseslint.config(
       // on demand by scripts/fetch-parser-refs.sh, not our code.
       ".parser-refs/",
       "stryker.config.mjs",
+      // Standalone Node adapter for the dotnet-monolith example —
+      // a runnable script outside the TS project service, same reason
+      // as stryker.config.mjs above.
+      "examples/dotnet-monolith/tools/*.mjs",
       // AactLoop research bench corpus — standalone .mjs runners/scorers,
       // not part of the shipped TS project, so the typed lint's project
       // service can't resolve them. Research material, not core code.

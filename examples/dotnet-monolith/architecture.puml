@@ -1,0 +1,20 @@
+@startuml dotnet-monolith
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' Intended architecture of the Reservation monolith: one deployable,
+' three projects, one module boundary. Orders may use the Inventory
+' contract; the Inventory implementation belongs to Inventory alone.
+Container_Boundary(reservation_monolith, "Reservation Monolith") {
+
+    ' === Orders module ===
+    Component(orders, "Orders", "dotnet", $tags="bc:orders")
+
+    ' === Inventory module ===
+    Component(inventory_contracts, "Inventory.Contracts", "dotnet", $tags="bc:inventory")
+    Component(inventory_internal, "Inventory.Internal", "dotnet", $tags="bc:inventory")
+}
+
+Rel(orders, inventory_contracts, "", "ProjectReference")
+Rel(inventory_internal, inventory_contracts, "", "ProjectReference")
+
+@enduml
