@@ -12,7 +12,7 @@ Two project-specific rules running alongside `aact`'s built-ins:
 ```bash
 # From the example folder:
 cd examples/custom-rules
-npx aact@beta check
+npx aact check
 ```
 
 Expected output: two violations — both from the custom rules. The config

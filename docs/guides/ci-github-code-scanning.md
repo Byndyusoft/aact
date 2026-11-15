@@ -33,9 +33,10 @@ jobs:
           node-version: 22
 
       # aact выходит с кодом 1 при нарушениях — continue-on-error не даёт
-      # job упасть до того, как SARIF зальётся.
+      # job упасть до того, как SARIF зальётся. @3 — стабильная мажорная
+      # версия: v4 не приедет в CI без вашего ведома.
       - name: Lint architecture, emit SARIF
-        run: npx aact@beta check --sarif > aact.sarif
+        run: npx aact@3 check --sarif > aact.sarif
         continue-on-error: true
 
       - name: Upload to Code Scanning
@@ -78,7 +79,7 @@ Workflow выше только показывает алерты — job ост�
 ```yaml
 - name: Lint architecture, emit SARIF
   id: aact
-  run: npx aact@beta check --sarif > aact.sarif
+  run: npx aact@3 check --sarif > aact.sarif
   continue-on-error: true
 
 - name: Upload to Code Scanning

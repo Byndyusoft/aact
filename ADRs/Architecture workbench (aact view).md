@@ -48,7 +48,7 @@ tarball; the core CLI dynamic-imports it on demand and prints an
 actionable install hint when the package is absent.
 
 ```bash
-pnpm add -D @aact/view@beta   # one-time install
+pnpm add -D @aact/view   # one-time install
 npx aact view                 # → reads aact.config.ts, opens browser
 ```
 
@@ -56,7 +56,7 @@ If `@aact/view` is not installed, `aact view` exits 2 with:
 
 ```
 ✗ aact view requires @aact/view to be installed.
-  pnpm add -D @aact/view@beta
+  pnpm add -D @aact/view
   # or one-off:
   pnpm dlx -p aact -p @aact/view aact view
 ```

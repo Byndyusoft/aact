@@ -72,13 +72,10 @@ is defined in `src/cli/output/types.ts`; additions are additive,
 removals or renames require a `schemaVersion` bump.
 
 **`schemaVersion` freeze policy.** `schemaVersion` is the **stable**
-contract version — it locks at `v3.0.0` GA. During `3.0.0-beta.X` we
-reserve the right to remove or rename fields under `schemaVersion: 1`
-without bumping; breaking changes within beta are documented in
-`CHANGELOG.md` only. Bumping `schemaVersion` mid-beta would dilute its
-meaning as a public-contract marker; consumers pinning to `aact@beta`
-must read the CHANGELOG for shape changes. Post-GA, removals or
-renames bump `schemaVersion` per the additive rule above.
+contract version, locked at `1` since the `v3.0.0` GA. Changes under it
+are additive only; a removal or rename bumps `schemaVersion` per the rule
+above. (The `3.0.0-beta.X` line reshaped fields under `1` without a bump —
+those changes are in `CHANGELOG.md`.)
 
 ## Source-location hyperlinks
 
@@ -162,7 +159,7 @@ uses their types to group generated CHANGELOG entries.
 ## Public API contract
 
 What `src/index.ts` re-exports is the public surface. Anything else is
-internal and may change between betas without notice. Breaking changes
+internal and may change between releases without notice. Breaking changes
 to the public API require a `!` marker in the commit and a CHANGELOG
 entry.
 
@@ -213,7 +210,7 @@ pnpm release         # changelogen --release --push
 ```
 
 `CHANGELOG.md` is a public English document. No Russian-English mix.
-v3 is currently in `3.0.0-beta.X`; v2 entries stay when v3 ships.
+v3 is stable since `3.0.0`; the v2 and `3.0.0-beta.X` entries stay.
 
 ## Out of scope
 

@@ -36,31 +36,31 @@ Hide
 Type "source $(pwd)/docs/demo/.zshrc 2>/dev/null"
 Enter
 Sleep 1s
-Type "rm -rf /tmp/aact-demo && mkdir -p /tmp/aact-demo && cd /tmp/aact-demo && npx -y aact@beta --version > /dev/null 2>&1 && clear"
+Type "rm -rf /tmp/aact-demo && mkdir -p /tmp/aact-demo && cd /tmp/aact-demo && npx -y aact@latest --version > /dev/null 2>&1 && clear"
 Enter
 Sleep 12s
 Show
 
-Type "npx aact@beta init"
+Type "npx aact init"
 Enter
 Sleep 2.5s
 
-Type "npx aact@beta check"
+Type "npx aact check"
 Sleep 400ms
 Enter
 Sleep 3.5s
 
-Type "npx aact@beta check --fix"
+Type "npx aact check --fix"
 Sleep 400ms
 Enter
 Sleep 3s
 
-Type "npx aact@beta check"
+Type "npx aact check"
 Sleep 400ms
 Enter
 Sleep 2.5s
 
-Type "npx aact@beta analyze"
+Type "npx aact analyze"
 Sleep 400ms
 Enter
 Sleep 4.5s
