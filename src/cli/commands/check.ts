@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 
+import consola from "consola";
 import { box } from "consola/utils";
 import path from "pathe";
 
@@ -491,6 +492,39 @@ const compareViolations = (
   };
 };
 
+/**
+ * Rules explain a withheld fix ("would create a dependency cycle — fix
+ * manually") through `consola.warn`, the only channel the rule layer has.
+ * Printed directly, that text landed on stderr during a plain `check` and
+ * never reached the JSON envelope. Capture it while fixes are generated and
+ * hand it back as diagnostics instead.
+ */
+const captureFixWarnings = <T>(
+  run: () => T,
+): { readonly result: T; readonly warnings: readonly Diagnostic[] } => {
+  const warnings: Diagnostic[] = [];
+  const saved = consola.options.reporters;
+  consola.setReporters([
+    {
+      log: (entry) => {
+        const message = entry.args.map(String).join(" ");
+        const rule = /^fix (\S+):/u.exec(message)?.[1];
+        warnings.push({
+          kind: "fix.skipped",
+          message,
+          severity: "warning",
+          ...(rule ? { context: { rule } } : {}),
+        });
+      },
+    },
+  ]);
+  try {
+    return { result: run(), warnings };
+  } finally {
+    consola.setReporters(saved);
+  }
+};
+
 const computeExitCode = (
   violationsCount: number,
   fixesApplied: CheckFixesApplied | undefined,
@@ -526,15 +560,15 @@ export const executeCheck = async (
       diagnostics.push(fixCap.diagnostic);
     }
     if (fixCap.capability) {
-      const generated = generateFixes(
-        model,
-        results,
-        config.rules,
-        fixCap.capability.syntax,
-        effective,
+      const { syntax } = fixCap.capability;
+      const { result: generated, warnings } = captureFixWarnings(() =>
+        generateFixes(model, results, config.rules, syntax, effective),
       );
       suggestedFixes = generated.fixes;
       mergedRules = generated.mergedRules;
+      // Same reasoning as unsupportedFix above: why a fix was withheld only
+      // matters to someone asking for fixes.
+      if (mode !== "check") diagnostics.push(...warnings);
     }
   }
 

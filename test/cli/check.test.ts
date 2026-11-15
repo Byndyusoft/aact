@@ -315,6 +315,59 @@ describe("executeCheck — diagnostics", () => {
     expect(result.data.suggestedFixes).toHaveLength(0);
   });
 
+  it("reports a withheld fix as a diagnostic, and only when fixes were asked for", async () => {
+    // examples/violations-demo: the crud redirect would close a cycle, so the
+    // rule withholds the fix and explains why. That explanation used to hit
+    // stderr on every plain check and never reached the JSON envelope.
+    const cycleModel = () =>
+      makeModel({
+        elements: [
+          {
+            name: "orders_api",
+            relations: [{ to: "orders_crud" }, { to: "inventory_api" }],
+          },
+          {
+            name: "orders_crud",
+            tags: ["repo"],
+            relations: [{ to: "orders_db" }],
+          },
+          { name: "orders_db", kind: "ContainerDb" },
+          { name: "inventory_api", relations: [{ to: "orders_db" }] },
+        ],
+        boundaries: [
+          {
+            name: "orders",
+            elementNames: ["orders_api", "orders_crud", "orders_db"],
+          },
+          { name: "inventory", elementNames: ["inventory_api"] },
+        ],
+      });
+    mockLoadFormat.mockResolvedValue(fakeFormat("plantuml"));
+    mockLoadModel.mockResolvedValue({ model: cycleModel(), issues: [] });
+    const config: AactConfig = {
+      source: { type: "plantuml", path: "test.puml" },
+      rules: { crud: true },
+    };
+    const stderr = vi
+      .spyOn(process.stderr, "write")
+      .mockImplementation(() => true);
+
+    const plain = await executeCheck(config, {});
+    const preview = await executeCheck(config, { "dry-run": true });
+
+    expect(plain.diagnostics?.some((d) => d.kind === "fix.skipped")).toBe(
+      false,
+    );
+    expect(stderr).not.toHaveBeenCalled();
+    expect(preview.diagnostics).toContainEqual(
+      expect.objectContaining({
+        kind: "fix.skipped",
+        context: { rule: "crud" },
+        message: expect.stringContaining("would create a dependency cycle"),
+      }),
+    );
+  });
+
   it("stays quiet about --fix support on a plain check", async () => {
     // Regression: `aact check` on a model-json / Structurizr JSON source
     // warned "doesn't support --fix" although nobody passed --fix.

@@ -47,6 +47,7 @@ export type DiagnosticKind =
   | "format.outputPathCollision"
   // Fix engine
   | "fix.editConflict"
+  | "fix.skipped"
   // Skill installer
   | "skill.unmanagedDir"
   | "skill.repoMismatch"
