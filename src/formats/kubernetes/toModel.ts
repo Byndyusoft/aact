@@ -150,6 +150,9 @@ const buildElement = (
     tags: Object.freeze(tags),
     relations: Object.freeze([...relations]),
     ...(link && link.length > 0 ? { link } : {}),
+    ...(manifest.sourceLocation
+      ? { sourceLocation: manifest.sourceLocation }
+      : {}),
   } satisfies Element);
 };
 

@@ -11,14 +11,18 @@ import {
   technologyLabel,
 } from "../_shared/imageHeuristic";
 import { parseCsvTags } from "../_shared/tags";
+import type { Document, OffsetTable } from "../_shared/yamlSourceMap";
+import {
+  findKeyPair,
+  keyLocation,
+  valueLocationFor,
+} from "../_shared/yamlSourceMap";
 import { normalizeDependsOn } from "./dependsOn";
 import type { IncludedFile } from "./include";
 import { normalizeLabels, resolveLabelKeys } from "./labels";
 import { buildAiModelElement, buildAiModelRelation } from "./models";
 import { resolveNamingTransform } from "./naming";
 import { buildProviderElement } from "./providers";
-import type { Document, OffsetTable } from "./sourceMap";
-import { findKeyPair, keyLocation, valueLocationFor } from "./sourceMap";
 import type {
   ComposeLoadOptions,
   ParsedAiModel,
