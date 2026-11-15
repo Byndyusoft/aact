@@ -428,3 +428,49 @@ describe("dbPerServiceRule.fix (structurizr syntax)", () => {
     expect(rel).toBe('payments -> orders_repo "" "JDBC"');
   });
 });
+
+describe("dbPerServiceRule.fix — cross-boundary redirect", () => {
+  // examples/violations-demo: orders_db is owned by orders_crud and also
+  // read by inventory_api from another context.
+  const sharedDb = (extraRels: string[]) =>
+    [
+      "@startuml",
+      STDLIB,
+      'System_Boundary(orders, "Orders") {',
+      '  Container(orders_api, "Orders API")',
+      '  Container(orders_crud, "Orders CRUD", $tags="repo")',
+      '  ContainerDb(orders_db, "Orders DB")',
+      "}",
+      'System_Boundary(inventory, "Inventory") {',
+      '  Container(inventory_api, "Inventory API")',
+      "}",
+      'Rel(orders_api, orders_crud, "")',
+      'Rel(orders_crud, orders_db, "")',
+      'Rel(inventory_api, orders_db, "reads", "SQL")',
+      ...extraRels,
+      "@enduml",
+    ].join("\n");
+
+  it("routes the foreign accessor through the owning context's API, without the DB protocol", async () => {
+    const { fixes, content } = await pumlFix(sharedDb([]), "orders_db");
+    expect(fixes[0].description).toBe(
+      "Redirect access to orders_db through orders_api",
+    );
+    expect(content).toContain('Rel(inventory_api, orders_api, "reads")');
+    expect(content).not.toContain(
+      'Rel(inventory_api, orders_api, "reads", "SQL")',
+    );
+  });
+
+  it("refuses the redirect when it would close a dependency cycle", async () => {
+    const warn = vi.spyOn(consola, "warn").mockImplementation(() => {});
+    const { fixes } = await pumlFix(
+      sharedDb(['Rel(orders_api, inventory_api, "")']),
+      "orders_db",
+    );
+    expect(fixes).toHaveLength(0);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("would create a dependency cycle"),
+    );
+  });
+});

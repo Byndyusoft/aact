@@ -186,6 +186,8 @@ Rel(orders_repo, orders_db, "SQL")`,
 
       const owner = resolveOwner(db.name, accessors, options);
 
+      // Where the rewired edges actually go — owner or the owning context's API.
+      const targets = new Set<string>();
       const edits: SourceEdit[] = accessors
         .filter((c) => c !== owner)
         .flatMap((accessor): SourceEdit[] => {
@@ -203,15 +205,17 @@ Rel(orders_repo, orders_db, "SQL")`,
             "dbPerService",
           );
           if (!redirectTarget) return [];
+          targets.add(redirectTarget.name);
 
           const tags = rel.tags.length > 0 ? rel.tags.join("+") : undefined;
           return [
             {
               kind: "replace",
               range: rel.sourceLocation,
+              // The DB protocol described the old edge; the new one calls the
+              // owner (or the owning context's API), so it is dropped.
               content: syntax.relationDecl(accessor.name, redirectTarget.name, {
                 description: rel.description,
-                technology: rel.technology,
                 tags,
               }),
             },
@@ -222,7 +226,7 @@ Rel(orders_repo, orders_db, "SQL")`,
 
       results.push({
         ruleId: "dbPerService",
-        description: `Redirect access to ${db.name} through ${owner.name}`,
+        description: `Redirect access to ${db.name} through ${[...targets].join(", ")}`,
         edits,
       });
     }

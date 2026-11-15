@@ -96,6 +96,9 @@ const fixNonRepoAccessesDb = (
     isDatabaseElement(targetOf(model, r)),
   );
   const elementBoundaryMap = buildElementBoundaryMap(model);
+  // What each rewired DB edge now goes through — for the fix description,
+  // which has to name the real target (a repo, or another context's API).
+  const routes: string[] = [];
 
   const edits: SourceEdit[] = dbRels.flatMap((rel): SourceEdit[] => {
     const db = targetOf(model, rel);
@@ -148,14 +151,16 @@ const fixNonRepoAccessesDb = (
               },
             ]
           : [];
+      routes.push(`${db.name} via ${redirectTarget.name}`);
       return [
         ...tagEdits,
         {
           kind: "replace",
           range: rel.sourceLocation,
+          // The DB protocol (SQL, PostgreSQL…) described the old edge; the
+          // new one is a call to a repo or a service, so it is dropped.
           content: syntax.relationDecl(accessor.name, redirectTarget.name, {
             description: rel.description,
-            technology: rel.technology,
             tags: rel.tags.length > 0 ? rel.tags.join("+") : undefined,
           }),
         },
@@ -201,6 +206,7 @@ const fixNonRepoAccessesDb = (
         technology: rel.technology,
       }),
     ].join("\n");
+    routes.push(`${db.name} via new repo ${repoName}`);
     return [
       {
         kind: "insert-after",
@@ -210,9 +216,10 @@ const fixNonRepoAccessesDb = (
       {
         kind: "replace",
         range: rel.sourceLocation,
+        // The DB protocol moves to repo → db above; accessor → repo is a
+        // service call whose protocol the model doesn't know yet.
         content: syntax.relationDecl(accessor.name, repoName, {
           description: rel.description,
-          technology: rel.technology,
           tags: rel.tags.length > 0 ? rel.tags.join("+") : undefined,
         }),
       },
@@ -223,7 +230,7 @@ const fixNonRepoAccessesDb = (
 
   return {
     ruleId: "crud",
-    description: `Add repo intermediary for ${accessor.name} → ${dbRels.map((r) => r.to).join(", ")}`,
+    description: `Route ${accessor.name} → ${routes.join(", ")}`,
     edits,
   };
 };
