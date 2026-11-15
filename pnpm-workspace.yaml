@@ -6,3 +6,13 @@ allowBuilds:
   "@parcel/watcher": true
   esbuild: true
   unrs-resolver: true
+
+# Dev-tooling only (nothing here ships in the published packages): patched
+# releases of transitive deps that eslint-plugin-boundaries, -sonarjs,
+# ts-json-schema-generator and stryker still pin to vulnerable versions. Same major each time;
+# drop an entry once its parent upgrades on its own.
+overrides:
+  handlebars: ^4.7.10
+  qs: ^6.16.1
+  "minimatch@>=10.0.0 <10.2.3": ^10.2.3
+  "glob@>=9.0.0 <14.0.2": ^14.0.2
