@@ -493,7 +493,12 @@ export const executeCheck = async (
   let mergedRules: Readonly<Record<string, readonly string[]>> = {};
   if (violations.length > 0) {
     const fixCap = await resolveFixCapability(config);
-    if (fixCap.diagnostic) diagnostics.push(fixCap.diagnostic);
+    // Fixes are computed in every mode (they ship in `suggestedFixes`), but
+    // "this format can't --fix" only means something to someone who asked
+    // for --fix / --dry-run. In a plain check it reads as a user error.
+    if (fixCap.diagnostic && mode !== "check") {
+      diagnostics.push(fixCap.diagnostic);
+    }
     if (fixCap.capability) {
       const generated = generateFixes(
         model,

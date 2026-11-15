@@ -285,11 +285,33 @@ describe("executeCheck — diagnostics", () => {
       source: { type: "structurizr", path: "workspace.json" },
       rules: ALL_ON,
     };
-    const result = await executeCheck(config, {});
+    const result = await executeCheck(config, { fix: true });
     expect(
       result.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
     ).toBe(true);
     expect(result.data.suggestedFixes).toHaveLength(0);
+  });
+
+  it("stays quiet about --fix support on a plain check", async () => {
+    // Regression: `aact check` on a model-json / Structurizr JSON source
+    // warned "doesn't support --fix" although nobody passed --fix.
+    mockLoadFormat.mockResolvedValue({ name: "model-json" });
+    mockLoadModel.mockResolvedValue({ model: violatingModel(), issues: [] });
+    const config: AactConfig = {
+      source: { type: "model-json", path: "as-built.aact.json" },
+      rules: ALL_ON,
+    };
+
+    const plain = await executeCheck(config, {});
+    const preview = await executeCheck(config, { "dry-run": true });
+
+    expect(
+      plain.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
+    ).toBe(false);
+    expect(plain.data.suggestedFixes).toHaveLength(0);
+    expect(
+      preview.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
+    ).toBe(true);
   });
 
   it("DSL-source structurizr --fix writes back to source.path (no writePath)", async () => {
