@@ -253,9 +253,3 @@ const isInsideOpaqueBlock = (
   }
   return false;
 };
-
-// Re-exports for callers that want the lower-level pieces.
-export { parseStructurizrDsl, StructurizrParser } from "./parser";
-export { StructurizrLexer } from "./tokens";
-export { toModel } from "./toModel";
-export { buildAst } from "./visitor";

@@ -1,12 +1,6 @@
 import { version as aactVersion } from "../../../package.json";
 import { ToolError } from "./toolError";
-import type {
-  CliEnvelope,
-  CommandResult,
-  Diagnostic,
-  EnvelopeMeta,
-  ExitCode,
-} from "./types";
+import type { CliEnvelope, Diagnostic, EnvelopeMeta, ExitCode } from "./types";
 
 export interface BuildEnvelopeInput<TData> {
   readonly command: string;
@@ -74,9 +68,3 @@ export const buildErrorEnvelope = (
     },
   });
 };
-
-export const errorResult = (
-  input: ErrorEnvelopeInput,
-): CommandResult<null> => ({
-  envelope: buildErrorEnvelope(input),
-});

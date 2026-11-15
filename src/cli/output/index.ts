@@ -1,13 +1,7 @@
-export type { BuildEnvelopeInput, ErrorEnvelopeInput } from "./envelope";
-export { buildEnvelope, buildErrorEnvelope, errorResult } from "./envelope";
+export { buildEnvelope, buildErrorEnvelope } from "./envelope";
 export { flushOutput } from "./flush";
-export {
-  HumanReporter,
-  isErrorEnvelope,
-  renderErrorEnvelope,
-} from "./humanReporter";
+export { HumanReporter } from "./humanReporter";
 export { JsonReporter } from "./jsonReporter";
-export type { ResolveModeArgs } from "./resolveMode";
 export { resolveOutputMode } from "./resolveMode";
 export type {
   SarifAdapter,

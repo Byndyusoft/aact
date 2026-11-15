@@ -1346,7 +1346,3 @@ const splitTags = (raw: string): readonly string[] =>
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-
-// Re-export the Model type so callers don't need a separate import.
-
-export { type Model } from "../../../model";

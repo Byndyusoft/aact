@@ -4,13 +4,6 @@ import type { Format } from "../types";
 import { generate } from "./generate";
 import { load } from "./load";
 
-// ModelJsonFile is read by `scripts/generate-schema.ts` via the
-// ts-json-schema-generator AST scanner — that path is invisible to
-// knip. Re-exporting it from the barrel makes the file part of the
-// regular module graph too, so it can't go silently dead if the
-// schema script ever moves.
-export type { ModelJsonFile } from "./types";
-
 /**
  * `model-json` — format-neutral serialised Model. Canonical shape on
  * emit: `{ $schema, schemaVersion: 1, model: Model }`. Load accepts

@@ -1,7 +1,6 @@
 import {
   buildEnvelope,
   buildErrorEnvelope,
-  errorResult,
 } from "../../../src/cli/output/envelope";
 import { ToolError } from "../../../src/cli/output/toolError";
 
@@ -86,18 +85,6 @@ describe("buildErrorEnvelope", () => {
     expect(env.exitCode).toBe(2);
     expect(env.diagnostics[0].kind).toBe("internal.unexpected");
     expect(env.diagnostics[0].message).toBe("something exploded");
-  });
-
-  it("errorResult wraps buildErrorEnvelope into a CommandResult", () => {
-    const result = errorResult({
-      command: "check",
-      error: new ToolError("model.parseError", "bad"),
-      startedAt: Date.now(),
-      configPath: null,
-      source: "x.puml",
-    });
-    expect(result.envelope.exitCode).toBe(2);
-    expect(result.envelope.diagnostics[0].kind).toBe("model.parseError");
   });
 
   it("handles non-Error throws", () => {
