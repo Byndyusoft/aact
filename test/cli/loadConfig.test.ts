@@ -255,7 +255,7 @@ describe("loadAndValidateConfig — source.options", () => {
       },
     });
     await expect(loadAndValidateConfig()).rejects.toThrow(
-      /source\.options for format "kubernetes" failed schema validation/,
+      /Unknown source\.options key "namespace" for format "kubernetes"\. Accepted keys: .*namespaces/,
     );
   });
 
@@ -298,7 +298,7 @@ describe("loadAndValidateConfig — source.options", () => {
       },
     });
     await expect(loadAndValidateConfig()).rejects.toThrow(
-      /source\.options for format "plantuml" failed schema validation/,
+      /not accepted for format "plantuml": it has no load options \(got "anything"\)/,
     );
   });
 });

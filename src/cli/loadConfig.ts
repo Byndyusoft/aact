@@ -176,16 +176,40 @@ const validateSourceOptions = async (
       details,
     );
   }
-  try {
-    v.parse(format.loadOptionsSchema, options);
-  } catch (error) {
+  const result = v.safeParse(format.loadOptionsSchema, options);
+  if (result.success) return;
+
+  // An unknown key is the common mistake (a typo, or options copied from
+  // another format), and valibot words it as "Expected never but received
+  // …". Name the key and list what the format does accept instead.
+  const unknownKeys = result.issues
+    .filter((issue) => issue.type === "strict_object")
+    .map((issue) => String(issue.path?.at(-1)?.key));
+  const schema = format.loadOptionsSchema as { entries?: object };
+  const accepted = schema.entries ? Object.keys(schema.entries) : [];
+  if (unknownKeys.length > 0 && accepted.length === 0) {
     throw new ToolError(
       "config.invalidSchema",
-      `source.options for format "${type}" failed schema validation: ${describeError(error)}`,
+      `source.options is not accepted for format "${type}": it has no load options (got ${quoteAll(unknownKeys)}). Remove the block from aact.config.ts.`,
       details,
     );
   }
+  if (unknownKeys.length > 0) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `Unknown source.options key ${quoteAll(unknownKeys)} for format "${type}". Accepted keys: ${accepted.join(", ")}.`,
+      details,
+    );
+  }
+  throw new ToolError(
+    "config.invalidSchema",
+    `source.options for format "${type}" failed schema validation: ${describeError(new v.ValiError(result.issues))}`,
+    details,
+  );
 };
+
+const quoteAll = (keys: readonly string[]): string =>
+  keys.map((key) => `"${key}"`).join(", ");
 
 const parseConfig = (
   raw: unknown,
