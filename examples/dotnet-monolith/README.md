@@ -65,8 +65,11 @@ Run both adapters and compare. The declared graph has three edges; the
 compiled one has two:
 
 ```
-.csproj     orders → inventory_contracts, orders → inventory_internal
+.csproj     orders → inventory_contracts
+            orders → inventory_internal
+            inventory_internal → inventory_contracts
 assemblies  orders → inventory_internal
+            inventory_internal → inventory_contracts
 ```
 
 `OrderService` news up `InventoryService` directly and never touches
