@@ -36,7 +36,7 @@ Hide
 Type "source $(pwd)/docs/demo/.zshrc 2>/dev/null"
 Enter
 Sleep 1s
-Type "rm -rf /tmp/aact-demo && mkdir -p /tmp/aact-demo && cd /tmp/aact-demo && npx -y aact@latest --version > /dev/null 2>&1 && clear"
+Type "rm -rf /tmp/aact-demo && mkdir -p /tmp/aact-demo && cd /tmp/aact-demo && npx -y aact --version > /dev/null 2>&1 && clear"
 Enter
 Sleep 12s
 Show
