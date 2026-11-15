@@ -235,6 +235,29 @@ describe("executeCheck — exit code matrix", () => {
     expect(result.data.fixesApplied?.remaining).toBeGreaterThan(0);
   });
 
+  it("--fix counts violations the fix introduced separately from resolved ones", async () => {
+    // Pre-fix: violatingModel's violations. Post-fix: an unrelated cycle —
+    // every old violation is gone and every new one was introduced.
+    mockLoadModel
+      .mockResolvedValueOnce({ model: violatingModel(), issues: [] })
+      .mockResolvedValueOnce({ model: cyclicModel(), issues: [] });
+    mockReadFile.mockResolvedValue(
+      [
+        'Container(my_service, "My Service")',
+        'System_Ext(ext_system, "External System")',
+        'Rel(my_service, ext_system, "")',
+      ].join("\n"),
+    );
+    mockWriteFile.mockResolvedValue();
+
+    const result = await executeCheck(plantumlConfig, { fix: true });
+    const applied = result.data.fixesApplied!;
+
+    expect(applied.resolved).toBe(applied.before.violations.length);
+    expect(applied.introduced).toBe(applied.remaining);
+    expect(applied.introduced).toBeGreaterThan(0);
+  });
+
   it("exitCode 1 when violations exist but no auto-fix is available", async () => {
     mockLoadModel.mockResolvedValue({ model: cyclicModel(), issues: [] });
     const result = await executeCheck(
@@ -799,6 +822,8 @@ describe("renderCheckText", () => {
           fixesApplied: {
             count: 3,
             remaining: 0,
+            resolved: 3,
+            introduced: 0,
             writePath: "/abs/test.puml",
             before: {
               violations: [],
@@ -812,6 +837,42 @@ describe("renderCheckText", () => {
     );
     expect(output()).toContain("3 fixes applied");
     expect(output()).toContain("/abs/test.puml");
+  });
+
+  it("reports violations a fix introduced instead of netting them out", () => {
+    // Regression (examples/violations-demo): 4 violations before, 3 new
+    // ones after, rendered as "1 violation resolved".
+    const { sink, output } = captureSink();
+    renderHuman(
+      buildEnvelope({
+        command: "check",
+        exitCode: 1,
+        data: {
+          mode: "fix",
+          violations: [],
+          suggestedFixes: [],
+          summary: { failed: 2, passed: 6, violations: 3 },
+          rules: [],
+          fixesApplied: {
+            count: 3,
+            remaining: 3,
+            resolved: 4,
+            introduced: 3,
+            writePath: "/abs/workspace.dsl",
+            before: {
+              violations: [],
+              summary: { failed: 3, passed: 5, violations: 4 },
+            },
+          },
+        },
+        meta: { durationMs: 1, configPath: null, source: null },
+      }),
+      sink,
+    );
+    const text = stripAnsi(output());
+    expect(text).toContain("4 violations resolved");
+    expect(text).toContain("3 new violations introduced");
+    expect(text).toContain("3 violations remaining");
   });
 
   // Property-based check that the `mode` argument — not the

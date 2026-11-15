@@ -92,6 +92,14 @@ export interface CheckSummary {
 export interface CheckFixesApplied {
   readonly count: number;
   readonly remaining: number;
+  /** Pre-fix violations that are gone after the fix (matched by rule + target). */
+  readonly resolved: number;
+  /**
+   * Post-fix violations that did not exist before — what the fix itself
+   * caused. Non-zero means `--fix` traded one problem for another; a
+   * plain `before − remaining` would hide it.
+   */
+  readonly introduced: number;
   /** Absolute path that received the fixes — always `config.source.path`. */
   readonly writePath: string;
   /**
@@ -465,6 +473,24 @@ const resolveMode = (args: CheckArgs): CheckMode => {
   return "check";
 };
 
+// A violation is "the same" across the pre- and post-fix runs when the rule
+// and the offending node match — the message can legitimately change (a
+// shared DB loses one accessor, a cycle gets shorter).
+const violationKey = (v: CheckViolation): string =>
+  `${v.ruleId}\u0000${v.targetKind}\u0000${v.target}`;
+
+const compareViolations = (
+  before: readonly CheckViolation[],
+  after: readonly CheckViolation[],
+): { readonly resolved: number; readonly introduced: number } => {
+  const beforeKeys = new Set(before.map(violationKey));
+  const afterKeys = new Set(after.map(violationKey));
+  return {
+    resolved: [...beforeKeys].filter((k) => !afterKeys.has(k)).length,
+    introduced: [...afterKeys].filter((k) => !beforeKeys.has(k)).length,
+  };
+};
+
 const computeExitCode = (
   violationsCount: number,
   fixesApplied: CheckFixesApplied | undefined,
@@ -521,9 +547,15 @@ export const executeCheck = async (
   let finalSummary: CheckSummary = summary;
   if (mode === "fix" && suggestedFixes.length > 0) {
     const result = await applyFixes(config, suggestedFixes, effective);
+    const { resolved, introduced } = compareViolations(
+      violations,
+      result.remainingViolations,
+    );
     fixesApplied = {
       count: suggestedFixes.length,
       remaining: result.remaining,
+      resolved,
+      introduced,
       writePath: result.writePath,
       before: { violations, summary },
     };
@@ -971,24 +1003,24 @@ const renderRemainingViolations = (
 
 const renderFixOutcomeBox = (
   applied: CheckFixesApplied,
-  postFixViolations: number,
   sink: NodeJS.WritableStream,
 ): void => {
-  // Two numbers tell different stories: how many edits landed (count)
-  // and how many violations they collectively resolved (pre − post).
-  // Without the second, one edit that resolves two rules reads as
-  // "only one problem fixed".
-  const resolved = Math.max(
-    0,
-    applied.before.violations.length - postFixViolations,
-  );
+  // Edits landed (count) and violations gone (resolved) tell different
+  // stories — one edit can resolve two rules. `introduced` is the one that
+  // must never hide inside a net number: a fix that closes four violations
+  // and opens three is not "1 resolved".
+  const { resolved, introduced } = applied;
   const fixLabel = applied.count === 1 ? "fix" : "fixes";
   const parts: string[] = [
     colors.green(`${applied.count} ${fixLabel} applied`),
   ];
-  if (resolved !== applied.count) {
+  if (resolved !== applied.count || introduced > 0) {
     const label = resolved === 1 ? "violation" : "violations";
     parts.push(colors.green(`${resolved} ${label} resolved`));
+  }
+  if (introduced > 0) {
+    const label = introduced === 1 ? "violation" : "violations";
+    parts.push(colors.red(`${introduced} new ${label} introduced`));
   }
   if (applied.remaining > 0) {
     const label = applied.remaining === 1 ? "violation" : "violations";
@@ -1034,7 +1066,7 @@ const renderFixOutcome = (
     renderRemainingViolations(data, sink);
   }
 
-  renderFixOutcomeBox(applied, data.violations.length, sink);
+  renderFixOutcomeBox(applied, sink);
 };
 
 // -----------------------------------------------------------------------------
