@@ -161,3 +161,70 @@ describe("computeDiff — relation properties (P2.5)", () => {
     expect(relChange?.severity).toBe("semantic");
   });
 });
+
+describe("computeDiff — absent vs empty optional text", () => {
+  // Regression: PlantUML `Rel(a, b, "")` loads with no description while a
+  // model-json produced by an external adapter carries `""`. The strict
+  // comparison reported one phantom cosmetic change per such relation
+  // (seen on examples/dotnet-monolith: "+ 2 cosmetic changes").
+  it("treats an undefined and an empty relation description as equal", () => {
+    const a = makeModel({
+      elements: [
+        { name: "orders", relations: [{ to: "inventory", technology: "Ref" }] },
+        { name: "inventory" },
+      ],
+    });
+    const b = makeModel({
+      elements: [
+        {
+          name: "orders",
+          relations: [{ to: "inventory", technology: "Ref", description: "" }],
+        },
+        { name: "inventory" },
+      ],
+    });
+
+    expect(computeDiff(a, b, SIDE, SIDE).changes).toHaveLength(0);
+  });
+
+  it("treats an undefined and an empty boundary description as equal", () => {
+    const a = makeModel({
+      elements: [{ name: "orders" }],
+      boundaries: [{ name: "mono", elementNames: ["orders"] }],
+    });
+    const b = makeModel({
+      elements: [{ name: "orders" }],
+      boundaries: [{ name: "mono", elementNames: ["orders"], description: "" }],
+    });
+
+    expect(computeDiff(a, b, SIDE, SIDE).changes).toHaveLength(0);
+  });
+
+  it("still reports a real description change", () => {
+    const a = makeModel({
+      elements: [
+        { name: "orders", relations: [{ to: "inventory", technology: "Ref" }] },
+        { name: "inventory" },
+      ],
+    });
+    const b = makeModel({
+      elements: [
+        {
+          name: "orders",
+          relations: [
+            { to: "inventory", technology: "Ref", description: "reserves" },
+          ],
+        },
+        { name: "inventory" },
+      ],
+    });
+
+    expect(computeDiff(a, b, SIDE, SIDE).changes).toEqual([
+      expect.objectContaining({
+        entity: "relation",
+        action: "modified",
+        severity: "cosmetic",
+      }),
+    ]);
+  });
+});

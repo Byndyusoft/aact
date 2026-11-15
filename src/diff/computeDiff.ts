@@ -326,6 +326,17 @@ const diffElementFields = (
   return fields;
 };
 
+/**
+ * Optional free-text fields: an absent value and an empty string say the
+ * same thing. PlantUML `Rel(a, b, "")` loads as `undefined` while a
+ * hand-written or adapter-emitted Model carries `""` — comparing them
+ * strictly reported a phantom cosmetic change on every such relation.
+ */
+const sameOptionalText = (
+  before: string | undefined,
+  after: string | undefined,
+): boolean => (before ?? "") === (after ?? "");
+
 const diffBoundaryFields = (
   before: Boundary,
   after: Boundary,
@@ -337,7 +348,7 @@ const diffBoundaryFields = (
   if (before.label !== after.label) {
     fields.push({ field: "label", before: before.label, after: after.label });
   }
-  if (before.description !== after.description) {
+  if (!sameOptionalText(before.description, after.description)) {
     fields.push({
       field: "description",
       before: before.description,
@@ -394,7 +405,7 @@ const diffRelationFields = (
   after: Relation,
 ): FieldChange[] => {
   const fields: FieldChange[] = [];
-  if (before.description !== after.description) {
+  if (!sameOptionalText(before.description, after.description)) {
     fields.push({
       field: "description",
       before: before.description,
