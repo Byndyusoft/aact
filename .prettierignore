@@ -13,3 +13,7 @@ docs/reference/
 # core.symlinks=false. Formatting them would change the symlink target.
 CLAUDE.md
 .github/copilot-instructions.md
+
+# Written by pnpm. Reformatting it makes every `pnpm install` produce a
+# quote-style diff against the committed file.
+pnpm-lock.yaml

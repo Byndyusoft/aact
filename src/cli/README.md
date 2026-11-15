@@ -45,13 +45,9 @@ red banner.
 ## `schemaVersion` freeze policy
 
 `schemaVersion` is the **stable public-contract marker** — locked at
-`v3.0.0` GA. During `3.0.0-beta.X` we reserve the right to remove or
-rename fields under `schemaVersion: 1` without bumping; breaking
-changes within beta are documented in `CHANGELOG.md` only. Bumping
-`schemaVersion` mid-beta would dilute its meaning. Consumers pinning
-to `aact@beta` must read the CHANGELOG for shape changes; consumers
-on `aact@latest` (post-GA) can rely on `schemaVersion` for
-backward-compat detection.
+`1` since the `v3.0.0` GA, so consumers can rely on it for
+backward-compat detection. (The `3.0.0-beta.X` line reshaped fields
+under `1` without a bump; those changes are in `CHANGELOG.md`.)
 
 Post-GA, the rule is: **additive only**. New per-command fields,
 new `DiagnosticKind` literals, new reporter formats — all

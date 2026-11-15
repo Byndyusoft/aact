@@ -4,6 +4,87 @@ All notable changes to `aact` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v3.1.0 — 2026-11-15
+
+> `source.options` is now validated against the format that reads it, one
+> config can drive a whole corpus of same-format files, and a new example
+> checks a .NET modular monolith from two dependency graphs. Running every
+> example end to end also surfaced auto-fixes that could make an
+> architecture worse — those are fixed here.
+
+### Added
+
+- **`examples/dotnet-monolith`** — a modular monolith checked from two
+  sources: the declared graph read from `*.csproj` (`ProjectReference`, no
+  build needed) and the compiled graph read from assembly metadata
+  (`AssemblyReference`, after a build). Both adapters emit `model-json`, so
+  the same `check` and `diff` run on either; modules are C4 components inside
+  one container boundary.
+- **`Format.loadOptionsSchema`** (optional, valibot) — a format declares the
+  shape of its `source.options`. All five built-in formats now declare one;
+  the generated formats reference lists each format's option keys.
+
+### Changed
+
+- **`source.options` is validated against the format's schema.** It used to
+  accept anything: a mistyped key in a `kubernetes` or `compose` block passed
+  and was silently ignored by the loader. An unknown key, or options given to
+  a format that takes none (`plantuml`, `structurizr`, `model-json`), now
+  fails with `config.invalidSchema` (exit 2), naming the key and the keys the
+  format does accept. A config that passed before may fail now — it was
+  carrying options the loader never read.
+
+### Dependencies
+
+- **No known vulnerabilities in either package's production dependencies.**
+  `c12` moves from `4.0.0-beta.5` to `4.0.0-rc.4` (only `loadConfig` is used;
+  `magicast` is now an optional peer, which removes the `source-map-js`
+  advisory), and `@aact/view` moves `h3` from a release candidate to `2.0.8`
+  and picks up patched `node-forge` / `devalue` through `listhen` and Svelte.
+- `@aact/view` no longer installs `pathe`, which it never imported.
+- CI now also runs on Node 26 (LTS since 2026-10-28); 22 and 24 stay
+  supported.
+
+### Fixed
+
+- **`crud` and `dbPerService` auto-fixes no longer create dependency
+  cycles.** Rerouting a direct database access through the owning context's
+  API closed a cycle whenever that API already depended on the accessor —
+  on `examples/violations-demo`, `--fix` resolved four violations and
+  introduced three (`acyclic`, `stableDependencies`). Such a redirect is now
+  refused and left for a human; the reason is reported as a `fix.skipped`
+  diagnostic (rule in `context`) under `--fix` / `--dry-run`, and a plain
+  `check` no longer prints fix warnings to stderr. The rewired edge also no
+  longer inherits the database protocol (`SQL`) — that stays on the
+  repo → database edge — and fix descriptions name the actual target.
+- **`check --fix` reports violations it introduced.** The summary used to
+  print `before − after` as "resolved", so a fix that traded problems read
+  as progress. `fixesApplied` now carries `resolved` and `introduced`
+  (additive JSON fields), and the text summary shows introduced violations.
+- **Kubernetes violations point at their manifest.** Workloads now carry a
+  source location (the `metadata.name` line, also in multi-document files),
+  so `aact check ./k8s/` prints clickable `file:line:col` anchors like the
+  other formats.
+- **Docs, guides and examples no longer tell users to install
+  `aact@beta`,** which still resolves to `3.0.0-beta.29`. The CI guide pins
+  the stable major (`aact@3`).
+- **`npx aact` works inside a clone of the repository.** The built CLI was
+  written without the executable bit, so the examples' README commands
+  failed with "Permission denied". Installed packages were not affected.
+- **A positional `SOURCE` keeps the configured `source.options`** when it has
+  the configured format, so one `aact.config.ts` can drive `aact check a.dsl`,
+  `aact check b.dsl`, … over a corpus. Options are dropped only when the
+  positional resolves to a different format.
+- **Structurizr: `external` and `External System` tags mark an element as
+  external,** case-insensitively — real workspaces use both spellings; only
+  the exact `External` was recognised. `location External` still counts.
+- **`aact check` no longer warns "doesn't support --fix" on a plain check.**
+  The warning appeared for model-json and Structurizr JSON sources although
+  `--fix` was never passed; it now comes only with `--fix` / `--dry-run`.
+- **`aact diff` no longer reports phantom cosmetic changes** when one side has
+  no description on a relation or boundary and the other has an empty one
+  (PlantUML `Rel(a, b, "")` against an adapter-emitted model-json).
+
 ## v3.0.1 — 2026-09-06
 
 > Patch release. The `--json` envelope now survives a pipe, a missing

@@ -46,7 +46,7 @@ MySQL»:
 ## Визуально: `aact view --diff`
 
 ```bash
-npx -p aact@beta -p @aact/view@beta aact view --diff main:architecture.puml
+npx -p aact -p @aact/view aact view --diff main:architecture.puml
 ```
 
 Открывается workbench: текущая модель с цветным наложением поверх — добавленное
@@ -56,8 +56,8 @@ npx -p aact@beta -p @aact/view@beta aact view --diff main:architecture.puml
 ![aact view --diff: наложение + панель изменений](assets/review-diff/view-diff.png)
 
 `aact view` живёт в отдельном пакете `@aact/view` (чтобы CI и `aact check` не
-тянули фронтенд). Поэтому запуск — через `npx -p aact@beta -p @aact/view@beta`,
-либо поставьте локально (`pnpm add -D aact@beta @aact/view@beta`) и тогда просто
+тянули фронтенд). Поэтому запуск — через `npx -p aact -p @aact/view`,
+либо поставьте локально (`pnpm add -D aact @aact/view`) и тогда просто
 `npx aact view`.
 
 ## В CI и для PR-ботов

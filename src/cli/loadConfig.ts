@@ -154,6 +154,63 @@ const loadRawConfig = async (
   }
 };
 
+/**
+ * `source.options` — per-format shape, so the top-level schema can't
+ * check it; the format does, through `Format.loadOptionsSchema`. A
+ * format without a schema takes no options at all — silently ignoring
+ * a mistyped block is exactly the failure this guards against.
+ */
+const validateSourceOptions = async (
+  type: string,
+  options: unknown,
+  configPath: string | undefined,
+): Promise<void> => {
+  const format = await loadFormat(type);
+  const details: Record<string, string> = configPath
+    ? { path: configPath, type }
+    : { type };
+  if (format.loadOptionsSchema === undefined) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `source.options is not accepted for format "${type}": it has no load options. Remove the block from aact.config.ts.`,
+      details,
+    );
+  }
+  const result = v.safeParse(format.loadOptionsSchema, options);
+  if (result.success) return;
+
+  // An unknown key is the common mistake (a typo, or options copied from
+  // another format), and valibot words it as "Expected never but received
+  // …". Name the key and list what the format does accept instead.
+  const unknownKeys = result.issues
+    .filter((issue) => issue.type === "strict_object")
+    .map((issue) => String(issue.path?.at(-1)?.key));
+  const schema = format.loadOptionsSchema as { entries?: object };
+  const accepted = schema.entries ? Object.keys(schema.entries) : [];
+  if (unknownKeys.length > 0 && accepted.length === 0) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `source.options is not accepted for format "${type}": it has no load options (got ${quoteAll(unknownKeys)}). Remove the block from aact.config.ts.`,
+      details,
+    );
+  }
+  if (unknownKeys.length > 0) {
+    throw new ToolError(
+      "config.invalidSchema",
+      `Unknown source.options key ${quoteAll(unknownKeys)} for format "${type}". Accepted keys: ${accepted.join(", ")}.`,
+      details,
+    );
+  }
+  throw new ToolError(
+    "config.invalidSchema",
+    `source.options for format "${type}" failed schema validation: ${describeError(new v.ValiError(result.issues))}`,
+    details,
+  );
+};
+
+const quoteAll = (keys: readonly string[]): string =>
+  keys.map((key) => `"${key}"`).join(", ");
+
 const parseConfig = (
   raw: unknown,
   configPath: string | undefined,
@@ -228,6 +285,10 @@ export const loadAndValidateConfig = async (
       `Unknown source.type "${type}" in aact.config.ts (known: ${knownFormatNames().join(", ")}).`,
       { type },
     );
+  }
+
+  if (sourceOptions !== undefined) {
+    await validateSourceOptions(type, sourceOptions, configFile ?? undefined);
   }
 
   const customRules = parsed.customRules

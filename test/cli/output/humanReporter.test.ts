@@ -1,6 +1,5 @@
 import {
   HumanReporter,
-  isErrorEnvelope,
   renderErrorEnvelope,
 } from "../../../src/cli/output/humanReporter";
 import type { CliEnvelope, Renderer } from "../../../src/cli/output/types";
@@ -115,12 +114,6 @@ describe("HumanReporter", () => {
     );
 
     expect(stripAnsi(chunks.join(""))).toMatch(/analyze failed/);
-  });
-
-  it("isErrorEnvelope returns true only for exitCode 2", () => {
-    expect(isErrorEnvelope(makeEnvelope({ exitCode: 2 }))).toBe(true);
-    expect(isErrorEnvelope(makeEnvelope({ exitCode: 1 }))).toBe(false);
-    expect(isErrorEnvelope(makeEnvelope({ exitCode: 0 }))).toBe(false);
   });
 
   it("writes diagnostics summary to stderr alongside the primary render", () => {

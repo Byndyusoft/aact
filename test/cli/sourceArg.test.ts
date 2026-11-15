@@ -55,3 +55,43 @@ describe("applyPositionalSource", () => {
     expect(out?.source.type).toBe("structurizr");
   });
 });
+
+describe("applyPositionalSource — source.options", () => {
+  const WITH_OPTIONS: AactConfig = {
+    source: {
+      path: "./configured.dsl",
+      type: "structurizr",
+      options: { namespaces: ["shop"] },
+    },
+    rules: { acl: true },
+  };
+
+  it("keeps source.options when the positional resolves to the same format", async () => {
+    const out = await applyPositionalSource(WITH_OPTIONS, { source: DSL });
+    expect(out?.source).toEqual({
+      path: DSL,
+      type: "structurizr",
+      options: { namespaces: ["shop"] },
+    });
+  });
+
+  it("infers the configured format from its path when `type` is omitted", async () => {
+    // The valibot schema infers `type` from the path when omitted; the
+    // TS type keeps it required, so widen for this runtime shape.
+    const config = {
+      source: { path: "./configured.dsl", options: { skip: ["debug-*"] } },
+      rules: {},
+    } as unknown as AactConfig;
+    const out = await applyPositionalSource(config, { source: DSL });
+    expect(out?.source).toEqual({
+      path: DSL,
+      type: "structurizr",
+      options: { skip: ["debug-*"] },
+    });
+  });
+
+  it("drops source.options when the positional is a different format", async () => {
+    const out = await applyPositionalSource(WITH_OPTIONS, { source: K8S_DIR });
+    expect(out?.source).toEqual({ path: K8S_DIR, type: "kubernetes" });
+  });
+});

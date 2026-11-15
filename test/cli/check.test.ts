@@ -235,6 +235,29 @@ describe("executeCheck — exit code matrix", () => {
     expect(result.data.fixesApplied?.remaining).toBeGreaterThan(0);
   });
 
+  it("--fix counts violations the fix introduced separately from resolved ones", async () => {
+    // Pre-fix: violatingModel's violations. Post-fix: an unrelated cycle —
+    // every old violation is gone and every new one was introduced.
+    mockLoadModel
+      .mockResolvedValueOnce({ model: violatingModel(), issues: [] })
+      .mockResolvedValueOnce({ model: cyclicModel(), issues: [] });
+    mockReadFile.mockResolvedValue(
+      [
+        'Container(my_service, "My Service")',
+        'System_Ext(ext_system, "External System")',
+        'Rel(my_service, ext_system, "")',
+      ].join("\n"),
+    );
+    mockWriteFile.mockResolvedValue();
+
+    const result = await executeCheck(plantumlConfig, { fix: true });
+    const applied = result.data.fixesApplied!;
+
+    expect(applied.resolved).toBe(applied.before.violations.length);
+    expect(applied.introduced).toBe(applied.remaining);
+    expect(applied.introduced).toBeGreaterThan(0);
+  });
+
   it("exitCode 1 when violations exist but no auto-fix is available", async () => {
     mockLoadModel.mockResolvedValue({ model: cyclicModel(), issues: [] });
     const result = await executeCheck(
@@ -285,11 +308,86 @@ describe("executeCheck — diagnostics", () => {
       source: { type: "structurizr", path: "workspace.json" },
       rules: ALL_ON,
     };
-    const result = await executeCheck(config, {});
+    const result = await executeCheck(config, { fix: true });
     expect(
       result.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
     ).toBe(true);
     expect(result.data.suggestedFixes).toHaveLength(0);
+  });
+
+  it("reports a withheld fix as a diagnostic, and only when fixes were asked for", async () => {
+    // examples/violations-demo: the crud redirect would close a cycle, so the
+    // rule withholds the fix and explains why. That explanation used to hit
+    // stderr on every plain check and never reached the JSON envelope.
+    const cycleModel = () =>
+      makeModel({
+        elements: [
+          {
+            name: "orders_api",
+            relations: [{ to: "orders_crud" }, { to: "inventory_api" }],
+          },
+          {
+            name: "orders_crud",
+            tags: ["repo"],
+            relations: [{ to: "orders_db" }],
+          },
+          { name: "orders_db", kind: "ContainerDb" },
+          { name: "inventory_api", relations: [{ to: "orders_db" }] },
+        ],
+        boundaries: [
+          {
+            name: "orders",
+            elementNames: ["orders_api", "orders_crud", "orders_db"],
+          },
+          { name: "inventory", elementNames: ["inventory_api"] },
+        ],
+      });
+    mockLoadFormat.mockResolvedValue(fakeFormat("plantuml"));
+    mockLoadModel.mockResolvedValue({ model: cycleModel(), issues: [] });
+    const config: AactConfig = {
+      source: { type: "plantuml", path: "test.puml" },
+      rules: { crud: true },
+    };
+    const stderr = vi
+      .spyOn(process.stderr, "write")
+      .mockImplementation(() => true);
+
+    const plain = await executeCheck(config, {});
+    const preview = await executeCheck(config, { "dry-run": true });
+
+    expect(plain.diagnostics?.some((d) => d.kind === "fix.skipped")).toBe(
+      false,
+    );
+    expect(stderr).not.toHaveBeenCalled();
+    expect(preview.diagnostics).toContainEqual(
+      expect.objectContaining({
+        kind: "fix.skipped",
+        context: { rule: "crud" },
+        message: expect.stringContaining("would create a dependency cycle"),
+      }),
+    );
+  });
+
+  it("stays quiet about --fix support on a plain check", async () => {
+    // Regression: `aact check` on a model-json / Structurizr JSON source
+    // warned "doesn't support --fix" although nobody passed --fix.
+    mockLoadFormat.mockResolvedValue({ name: "model-json" });
+    mockLoadModel.mockResolvedValue({ model: violatingModel(), issues: [] });
+    const config: AactConfig = {
+      source: { type: "model-json", path: "as-built.aact.json" },
+      rules: ALL_ON,
+    };
+
+    const plain = await executeCheck(config, {});
+    const preview = await executeCheck(config, { "dry-run": true });
+
+    expect(
+      plain.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
+    ).toBe(false);
+    expect(plain.data.suggestedFixes).toHaveLength(0);
+    expect(
+      preview.diagnostics?.some((d) => d.kind === "format.unsupportedFix"),
+    ).toBe(true);
   });
 
   it("DSL-source structurizr --fix writes back to source.path (no writePath)", async () => {
@@ -777,6 +875,8 @@ describe("renderCheckText", () => {
           fixesApplied: {
             count: 3,
             remaining: 0,
+            resolved: 3,
+            introduced: 0,
             writePath: "/abs/test.puml",
             before: {
               violations: [],
@@ -790,6 +890,42 @@ describe("renderCheckText", () => {
     );
     expect(output()).toContain("3 fixes applied");
     expect(output()).toContain("/abs/test.puml");
+  });
+
+  it("reports violations a fix introduced instead of netting them out", () => {
+    // Regression (examples/violations-demo): 4 violations before, 3 new
+    // ones after, rendered as "1 violation resolved".
+    const { sink, output } = captureSink();
+    renderHuman(
+      buildEnvelope({
+        command: "check",
+        exitCode: 1,
+        data: {
+          mode: "fix",
+          violations: [],
+          suggestedFixes: [],
+          summary: { failed: 2, passed: 6, violations: 3 },
+          rules: [],
+          fixesApplied: {
+            count: 3,
+            remaining: 3,
+            resolved: 4,
+            introduced: 3,
+            writePath: "/abs/workspace.dsl",
+            before: {
+              violations: [],
+              summary: { failed: 3, passed: 5, violations: 4 },
+            },
+          },
+        },
+        meta: { durationMs: 1, configPath: null, source: null },
+      }),
+      sink,
+    );
+    const text = stripAnsi(output());
+    expect(text).toContain("4 violations resolved");
+    expect(text).toContain("3 new violations introduced");
+    expect(text).toContain("3 violations remaining");
   });
 
   // Property-based check that the `mode` argument — not the

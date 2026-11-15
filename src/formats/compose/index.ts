@@ -1,6 +1,56 @@
+import * as v from "valibot";
+
+import { imageHeuristicSchema } from "../_shared/optionsSchema";
 import type { Format } from "../types";
 import { generate } from "./generate";
 import { load } from "./load";
+
+const optionalString = v.optional(v.string());
+const optionalStrings = v.optional(v.array(v.string()));
+
+/** Mirrors `ComposeLoadOptions` (types.ts) — keep in sync. */
+export const composeLoadOptionsSchema = v.strictObject({
+  naming: v.optional(
+    v.union([
+      v.picklist([
+        "as-is",
+        "kebab-to-camel",
+        "kebab-to-pascal",
+        "snake-to-camel",
+        "snake-to-pascal",
+        "to-kebab",
+        "to-snake",
+      ]),
+      // Runtime escape hatch — a function can't be validated deeper.
+      v.strictObject({ transform: v.function() }),
+    ]),
+  ),
+  labels: v.optional(
+    v.strictObject({
+      prefix: optionalString,
+      element: optionalString,
+      kind: optionalString,
+      label: optionalString,
+      description: optionalString,
+      technology: optionalString,
+      tags: optionalString,
+      external: optionalString,
+      link: optionalString,
+      skip: optionalString,
+    }),
+  ),
+  imageHeuristic: v.optional(imageHeuristicSchema),
+  skip: optionalStrings,
+  overrides: optionalStrings,
+  profiles: optionalStrings,
+  providers: v.optional(v.strictObject({ defaultTags: optionalStrings })),
+  models: v.optional(
+    v.strictObject({
+      defaultTags: optionalStrings,
+      relationDescription: optionalString,
+    }),
+  ),
+});
 
 /**
  * Docker Compose Format (Compose Spec 2026 edition).
@@ -57,6 +107,7 @@ const COMPOSE_FILENAMES: readonly string[] = Object.freeze([
 export const composeFormat: Format = {
   name: "compose",
   defaultPattern: COMPOSE_FILENAMES,
+  loadOptionsSchema: composeLoadOptionsSchema,
   load,
   generate,
 };

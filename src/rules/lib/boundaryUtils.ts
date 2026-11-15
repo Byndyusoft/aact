@@ -66,6 +66,31 @@ export const findPublicApiCandidate = (
  * Cross-boundary → public API of target boundary. Returns undefined если
  * no valid target — consola.warn для manual review.
  */
+/**
+ * Whether `from` can already reach `to` by following relations. Used to
+ * refuse a redirect that would close a dependency cycle: rewiring
+ * `accessor → db` to `accessor → target` adds the edge accessor → target,
+ * which is a cycle exactly when target already reaches accessor.
+ */
+const reaches = (model: Model, from: string, to: string): boolean => {
+  const seen = new Set<string>();
+  const queue = [from];
+  while (queue.length > 0) {
+    const name = queue.shift()!;
+    if (name === to) return true;
+    if (seen.has(name)) continue;
+    seen.add(name);
+    for (const rel of getElement(model, name)?.relations ?? []) {
+      queue.push(rel.to);
+    }
+  }
+  return false;
+};
+
+/**
+ * Picks where to send `accessor` instead of `db`, or `undefined` when no
+ * safe target exists (the caller then leaves the violation for a human).
+ */
 export const resolveRedirectTarget = (
   accessor: Element,
   db: Element,
@@ -83,7 +108,15 @@ export const resolveRedirectTarget = (
     dbBoundary !== undefined &&
     accessorBoundary !== dbBoundary;
 
-  if (!isCrossBoundary) return owner;
+  const unlessCycle = (target: Element): Element | undefined => {
+    if (!reaches(model, target.name, accessor.name)) return target;
+    consola.warn(
+      `fix ${ruleName}: routing "${accessor.name}" through "${target.name}" would create a dependency cycle ("${target.name}" already reaches "${accessor.name}") — fix manually`,
+    );
+    return undefined;
+  };
+
+  if (!isCrossBoundary) return unlessCycle(owner);
 
   const publicApi = findPublicApiCandidate(
     dbBoundary,
@@ -106,5 +139,5 @@ export const resolveRedirectTarget = (
     return undefined;
   }
 
-  return publicApi;
+  return unlessCycle(publicApi);
 };

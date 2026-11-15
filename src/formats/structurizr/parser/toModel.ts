@@ -23,7 +23,7 @@ import type {
 import { buildModel } from "../../../model";
 import { inferKindFromTechnology } from "../../_shared/kindHeuristics";
 import type { LoadResult } from "../../types";
-import { STRUCTURIZR_LOCATION_EXTERNAL } from "../types";
+import { hasExternalTag } from "../types";
 import type {
   ElementBodyNode,
   ElementNode,
@@ -739,8 +739,7 @@ const handleLeaf = (
   const agg = aggregateBody(element);
   const kind = kindFromLeaf(element, agg.technology);
   const external =
-    element.kind === "softwareSystem" &&
-    agg.tags.includes(STRUCTURIZR_LOCATION_EXTERNAL);
+    element.kind === "softwareSystem" && hasExternalTag(agg.tags);
   containers.push({
     name,
     label: displayName,
@@ -1180,10 +1179,7 @@ const mergeContainerBody = (
     ...c,
     description: delta.description ?? c.description,
     kind: inferKindForExistingContainer(c, technology),
-    external:
-      c.kind === "System"
-        ? tags.includes(STRUCTURIZR_LOCATION_EXTERNAL)
-        : c.external,
+    external: c.kind === "System" ? hasExternalTag(tags) : c.external,
     technology,
     tags,
     link: delta.link ?? c.link,
@@ -1350,7 +1346,3 @@ const splitTags = (raw: string): readonly string[] =>
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-
-// Re-export the Model type so callers don't need a separate import.
-
-export { type Model } from "../../../model";

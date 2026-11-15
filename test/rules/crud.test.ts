@@ -434,7 +434,7 @@ describe("crudRule.fix — edge cases", () => {
     ).toHaveLength(0);
   });
 
-  it("description pins exact `Add repo intermediary for X → Y` format", async () => {
+  it("description names the route the fix creates", async () => {
     const puml = [
       "@startuml",
       STDLIB,
@@ -445,8 +445,69 @@ describe("crudRule.fix — edge cases", () => {
     ].join("\n");
     const { fixes } = await pumlFix(puml, "orders");
     expect(fixes[0].description).toBe(
-      "Add repo intermediary for orders → orders_db",
+      "Route orders → orders_db via new repo orders_repo",
     );
+  });
+
+  it("keeps the DB protocol on repo → db, not on the rewired service edge", async () => {
+    // Regression: the rewired accessor edge inherited "SQL", so the model
+    // claimed a service called its repo over SQL.
+    const puml = [
+      "@startuml",
+      STDLIB,
+      'Container(orders, "Orders Service")',
+      'ContainerDb(orders_db, "Orders DB")',
+      'Rel(orders, orders_db, "reads", "SQL")',
+      "@enduml",
+    ].join("\n");
+    const { content } = await pumlFix(puml, "orders");
+    expect(content).toContain('Rel(orders_repo, orders_db, "", "SQL")');
+    expect(content).toContain('Rel(orders, orders_repo, "reads")');
+    expect(content).not.toMatch(/Rel\(orders, orders_repo, "reads", "SQL"\)/);
+  });
+
+  describe("cross-boundary redirect", () => {
+    // examples/violations-demo: inventory_api reads the Orders DB directly.
+    // The fix routes it through the Orders context's public API — unless
+    // that API already calls inventory_api, where the rewire is a cycle.
+    const contexts = (extraRels: string[]) =>
+      [
+        "@startuml",
+        STDLIB,
+        'System_Boundary(orders, "Orders") {',
+        '  Container(orders_api, "Orders API")',
+        '  Container(orders_crud, "Orders CRUD", $tags="repo")',
+        '  ContainerDb(orders_db, "Orders DB")',
+        "}",
+        'System_Boundary(inventory, "Inventory") {',
+        '  Container(inventory_api, "Inventory API")',
+        "}",
+        'Rel(orders_api, orders_crud, "")',
+        'Rel(orders_crud, orders_db, "")',
+        'Rel(inventory_api, orders_db, "", "SQL")',
+        ...extraRels,
+        "@enduml",
+      ].join("\n");
+
+    it("routes through the owning context's API", async () => {
+      const { fixes, content } = await pumlFix(contexts([]), "inventory_api");
+      expect(fixes[0].description).toBe(
+        "Route inventory_api → orders_db via orders_api",
+      );
+      expect(content).toContain('Rel(inventory_api, orders_api, "")');
+    });
+
+    it("refuses the redirect when it would close a dependency cycle", async () => {
+      const warn = vi.spyOn(consola, "warn").mockImplementation(() => {});
+      const { fixes } = await pumlFix(
+        contexts(['Rel(orders_api, inventory_api, "")']),
+        "inventory_api",
+      );
+      expect(fixes).toHaveLength(0);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("would create a dependency cycle"),
+      );
+    });
   });
 
   // Note: `relationDecl(from, to, tech)` currently emits `tech` in

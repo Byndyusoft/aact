@@ -1,9 +1,12 @@
 import { promises as fs } from "node:fs";
 
 import path from "pathe";
-import { parseAllDocuments } from "yaml";
+import type { Node } from "yaml";
+import { isScalar, parseAllDocuments } from "yaml";
 
-import type { ModelIssue } from "../../model";
+import type { ModelIssue, SourceLocation } from "../../model";
+import type { OffsetTable } from "../_shared/yamlSourceMap";
+import { findKeyPair, rangeToLocation } from "../_shared/yamlSourceMap";
 import { resolveKustomization } from "./kustomize";
 import type { ParsedManifest, ParsedMetadata } from "./types";
 
@@ -168,6 +171,7 @@ const parseFile = async (
   }
 
   const docs = parseAllDocuments(content);
+  const table = { source: content, file: filePath };
   for (const [docIndex, doc] of docs.entries()) {
     const json: unknown = doc.toJSON();
     if (!json || typeof json !== "object") continue; // empty doc
@@ -175,6 +179,7 @@ const parseFile = async (
       filePath,
       docIndex,
       json as Record<string, unknown>,
+      manifestLocation(table, doc.contents ?? undefined),
     );
     if (manifest === undefined) {
       issues.push({
@@ -195,10 +200,33 @@ const parseFile = async (
  * (missing apiVersion / kind / metadata.name) — caller'у issue
  * выставлять.
  */
+/**
+ * Where a manifest is declared: the `metadata.name` value (the line a reader
+ * looks for), falling back to the start of the document. Node ranges from
+ * `parseAllDocuments` are offsets into the whole file, so multi-document
+ * files resolve to the right line.
+ */
+const manifestLocation = (
+  table: OffsetTable,
+  contents: Node | undefined,
+): SourceLocation | undefined => {
+  const nameNode = findKeyPair(
+    findKeyPair(contents, "metadata")?.value as Node | undefined,
+    "name",
+  )?.value;
+  if (isScalar(nameNode) && Array.isArray(nameNode.range)) {
+    return rangeToLocation(table, nameNode.range);
+  }
+  return Array.isArray(contents?.range)
+    ? rangeToLocation(table, contents.range)
+    : undefined;
+};
+
 const toManifest = (
   filePath: string,
   docIndex: number,
   raw: Record<string, unknown>,
+  sourceLocation: SourceLocation | undefined,
 ): ParsedManifest | undefined => {
   const apiVersion = raw.apiVersion;
   const kind = raw.kind;
@@ -222,6 +250,7 @@ const toManifest = (
     metadata: meta,
     spec,
     raw,
+    ...(sourceLocation ? { sourceLocation } : {}),
   } satisfies ParsedManifest);
 };
 

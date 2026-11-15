@@ -17,6 +17,9 @@ export default <KnipConfig>{
         "examples/**/*.test.ts",
         "examples/**/aact.config.ts",
         "vitest.mutation.config.ts",
+        // Root type for `pnpm schema:gen`: ts-json-schema-generator reads
+        // `ModelJsonFile` from this file by name, so nothing imports it.
+        "src/formats/model-json/types.ts",
       ],
       project: ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts"],
     },
@@ -29,13 +32,7 @@ export default <KnipConfig>{
       // "unused" even though App.svelte pulls them in. Scope knip
       // to the server-side surface and trust Vite for the SPA.
       entry: ["ui/index.html"],
-      project: ["src/**/*.ts"],
-      ignoreDependencies: [
-        "pathe",
-        // Consumed inside .svelte files.
-        "@xyflow/svelte",
-        "elkjs",
-      ],
+      project: ["src/**/*.ts", "ui/**/*.{ts,svelte}"],
     },
   },
   ignoreDependencies: [

@@ -24,7 +24,7 @@ export const sourceArg = {
   },
 } as const;
 
-const detectType = async (raw: string): Promise<string> => {
+const inferType = async (raw: string): Promise<string | undefined> => {
   let isDirectory = false;
   try {
     isDirectory = (await fs.stat(raw)).isDirectory();
@@ -32,7 +32,11 @@ const detectType = async (raw: string): Promise<string> => {
     // Not statable yet — fall back to extension-based detection and let
     // the loader surface a precise "source not found" error.
   }
-  const type = detectFormatFromPath(raw, isDirectory);
+  return detectFormatFromPath(raw, isDirectory);
+};
+
+const detectType = async (raw: string): Promise<string> => {
+  const type = await inferType(raw);
   if (type === undefined) {
     throw new ToolError(
       "config.invalidSchema",
@@ -43,12 +47,24 @@ const detectType = async (raw: string): Promise<string> => {
   return type;
 };
 
+/** Format of the configured source — explicit `type`, else inferred from its path. */
+const configuredType = async (
+  source: AactConfig["source"],
+): Promise<string | undefined> =>
+  typeof source === "string"
+    ? inferType(source)
+    : (source.type ?? inferType(source.path));
+
 /**
  * Fold a positional `source` arg into the resolved config. Returns the
  * config unchanged (same reference) when no positional was given — the
  * caller uses that identity to decide whether a config was actually
- * required. Per-format `source.options` are dropped on override: they
- * belong to the configured source, not an ad-hoc path.
+ * required. Per-format `source.options` survive the override only when
+ * the positional path resolves to the same format as the configured
+ * source: they describe how to read that format (which tags mean
+ * "external", which annotations to honour), so one config can drive
+ * `aact check a.dsl`, `aact check b.dsl`, … over a corpus. A different
+ * format drops them — its loader would not understand them.
  */
 export const applyPositionalSource = async (
   config: AactConfig | null,
@@ -57,8 +73,22 @@ export const applyPositionalSource = async (
   const raw = args.source;
   if (typeof raw !== "string" || raw.length === 0) return config;
 
-  const source = { path: raw, type: await detectType(raw) };
-  if (config !== null) return { ...config, source };
+  const type = await detectType(raw);
+  if (config !== null) {
+    const prev = config.source;
+    const options =
+      typeof prev !== "string" &&
+      prev.options !== undefined &&
+      (await configuredType(prev)) === type
+        ? prev.options
+        : undefined;
+    const source =
+      options === undefined
+        ? { path: raw, type }
+        : { path: raw, type, options };
+    return { ...config, source };
+  }
+  const source = { path: raw, type };
 
   // No config to inherit rules from — synthesise one with every built-in
   // rule enabled, so `aact check architecture.dsl` lints with the full

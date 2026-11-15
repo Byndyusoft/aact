@@ -5,7 +5,7 @@ import {
   keyLocation,
   rangeToLocation,
   valueLocationFor,
-} from "../../../src/formats/compose/sourceMap";
+} from "../../../src/formats/_shared/yamlSourceMap";
 
 const sample = `services:
   api:

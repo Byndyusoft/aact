@@ -205,3 +205,58 @@ describe("walkManifests — entry resolution", () => {
     expect(manifests[0].metadata.annotations["aact.kind"]).toBe("ContainerDb");
   });
 });
+
+describe("walkManifests — source locations", () => {
+  // Regression: ParsedManifest.sourceLocation was declared but never set,
+  // so `aact check ./k8s/` printed violations with no file:line anchor.
+  it("points each manifest at its metadata.name, also in later documents", async () => {
+    const dir = await make();
+    const file = join(dir, "orders.yaml");
+    await writeFile(
+      file,
+      [
+        "apiVersion: apps/v1", // 1
+        "kind: Deployment", // 2
+        "metadata:", // 3
+        "  name: orders", // 4
+        "spec: {}", // 5
+        "---", // 6
+        "apiVersion: v1", // 7
+        "kind: Service", // 8
+        "metadata:", // 9
+        "  namespace: shop", // 10
+        "  name: orders-svc", // 11
+        "spec: {}",
+      ].join("\n"),
+    );
+    const { manifests } = await walkManifests(file);
+
+    expect(manifests[0].sourceLocation).toMatchObject({
+      file,
+      start: { line: 4, col: 9 },
+    });
+    expect(manifests[1].sourceLocation).toMatchObject({
+      file,
+      start: { line: 11, col: 9 },
+    });
+  });
+
+  it("falls back to the document start when metadata.name is not a plain scalar", async () => {
+    const dir = await make();
+    const file = join(dir, "anchor.yaml");
+    await writeFile(
+      file,
+      [
+        "apiVersion: apps/v1", // 1 — document start
+        "kind: Deployment",
+        "metadata:",
+        "  labels: { app: &n orders }",
+        "  name: *n", // an alias node, not a scalar
+        "spec: {}",
+      ].join("\n"),
+    );
+    const { manifests } = await walkManifests(file);
+    expect(manifests[0].metadata.name).toBe("orders");
+    expect(manifests[0].sourceLocation?.start.line).toBe(1);
+  });
+});

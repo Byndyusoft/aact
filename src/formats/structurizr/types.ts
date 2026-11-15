@@ -1,5 +1,19 @@
 // Structurizr JSON/DSL vocabulary — values as they appear in workspace.json
 export const STRUCTURIZR_LOCATION_EXTERNAL = "External";
+
+/**
+ * Tags that mark a software system external, matched case-insensitively.
+ * Real workspaces write `External`, `external`, `External System`; the
+ * loader recognises all of them so a model never needs re-tagging for
+ * aact. `location External` (JSON export) always counts.
+ */
+export const EXTERNAL_TAGS: ReadonlySet<string> = new Set([
+  "external",
+  "external system",
+]);
+
+export const hasExternalTag = (tags: readonly string[]): boolean =>
+  tags.some((t) => EXTERNAL_TAGS.has(t.toLowerCase()));
 export const STRUCTURIZR_INTERACTION_ASYNC = "Asynchronous";
 export const STRUCTURIZR_TAG_ASYNC = "async";
 

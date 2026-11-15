@@ -1,11 +1,5 @@
 import { colors } from "./colors";
-import type {
-  CliEnvelope,
-  CommandResult,
-  Diagnostic,
-  Renderer,
-  Reporter,
-} from "./types";
+import type { CommandResult, Diagnostic, Renderer, Reporter } from "./types";
 
 /**
  * Text-mode reporter. Routes the envelope through the command-supplied
@@ -88,6 +82,3 @@ export const renderErrorEnvelope: Renderer<unknown> = (envelope, sink) => {
     sink.write(`${colors.red("✗")} ${colors.bold(envelope.command)} failed\n`);
   }
 };
-
-export const isErrorEnvelope = (envelope: CliEnvelope): boolean =>
-  envelope.exitCode === 2;

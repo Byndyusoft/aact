@@ -823,6 +823,15 @@ describe("aact skill", () => {
   });
 });
 
+describe("built CLI binary", () => {
+  it("is executable, so `npx aact` works inside a clone", async () => {
+    // npm sets +x when installing a tarball, but in a clone npx resolves
+    // `aact` to the repo itself and runs dist/ in place.
+    const { mode } = await fs.stat(CLI_PATH);
+    expect(mode & 0o111).not.toBe(0);
+  });
+});
+
 describe("aact --help / --version", () => {
   it("--help lists the user-facing subcommands", async () => {
     const result = await runCli(["--help"]);

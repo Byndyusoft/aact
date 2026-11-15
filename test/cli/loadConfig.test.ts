@@ -221,3 +221,84 @@ describe("loadAndValidateConfig", () => {
     });
   });
 });
+
+describe("loadAndValidateConfig — source.options", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("accepts kubernetes options that match the format schema", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "kubernetes",
+          path: "./k8s",
+          options: { namespaces: ["shop"], skip: ["debug-*"] },
+        },
+      },
+    });
+    const { config } = await loadAndValidateConfig();
+    expect(config.source.options).toEqual({
+      namespaces: ["shop"],
+      skip: ["debug-*"],
+    });
+  });
+
+  it("rejects a mistyped key in kubernetes options", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "kubernetes",
+          path: "./k8s",
+          options: { namespace: ["shop"] },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /Unknown source\.options key "namespace" for format "kubernetes"\. Accepted keys: .*namespaces/,
+    );
+  });
+
+  it("rejects an invalid kind in compose imageHeuristic", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "compose",
+          path: "./compose.yaml",
+          options: { imageHeuristic: { "*postgres*": "Database" } },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /source\.options for format "compose"/,
+    );
+  });
+
+  it("accepts a compose naming transform function", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "compose",
+          path: "./compose.yaml",
+          options: { naming: { transform: (key: string) => key } },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).resolves.toBeDefined();
+  });
+
+  it("rejects source.options for a format whose schema is empty (plantuml)", async () => {
+    mockLoadConfig.mockResolvedValue({
+      config: {
+        source: {
+          type: "plantuml",
+          path: "./architecture.puml",
+          options: { anything: true },
+        },
+      },
+    });
+    await expect(loadAndValidateConfig()).rejects.toThrow(
+      /not accepted for format "plantuml": it has no load options \(got "anything"\)/,
+    );
+  });
+});
